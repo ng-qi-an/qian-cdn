@@ -32,6 +32,9 @@ export default async function ApplicationRendered({searchParams}: {searchParams:
         where: {
             ownerId: !viewAllAppsPerms.isAuthorised ? viewAllAppsPerms.user.id : {isNotNull: true}
         },
+        orderBy: {
+            updatedAt: "desc"
+        }
     })
     const personalApps = fetchedApps.filter((app) => app.ownerId == viewAllAppsPerms.user.id);
     const othersApps = fetchedApps.filter((app) => app.ownerId != viewAllAppsPerms.user.id);

@@ -21,8 +21,8 @@ export const POST = verifyUserWithPermission(async(user)=>{
         name: data.name,
         description: data.description,
         databaseId: data.databaseId,
-        limit: 0,
-        alerts: data.alerts || [],
+        limit: data.limit || 0,
+        alerts: [data.usageAlert],
         status: createPerms.isAuthorised ? "active" : "requested",
     }
     try {

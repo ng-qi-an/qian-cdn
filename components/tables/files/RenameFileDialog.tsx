@@ -33,7 +33,7 @@ export default function RenameFileDialog({currentName, fileId, open, onOpenChang
                         return toast.add({
                             title: "Error renaming file",
                             description: "An error occurred while renaming the file. Please try again.",
-                            type: "destructive"
+                            type: "error"
                         })
                     }
                     await revalidateData(window.location.pathname);
@@ -43,7 +43,7 @@ export default function RenameFileDialog({currentName, fileId, open, onOpenChang
                     toast.add({
                         title: "Error renaming file",
                         description: "An error occurred while renaming the file. Please try again.",
-                        type: "destructive"
+                        type: "error"
                     })
                 } finally {
                     setSubmitting(false);

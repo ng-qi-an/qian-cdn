@@ -45,7 +45,7 @@ export function CreateDatabasesForm({fetchedDatabases, createPerms}: {fetchedDat
         </Alert>}
         <form className="w-full h-full flex flex-col min-h-0" onSubmit={async(e)=>{
             e.preventDefault()
-            if (!name || !limit || !limitUnit || !usageAlert || !visibility || !provider || (provider == "cloudflare-r2" && (!accessUrl || !accessKeyId || !secretAccessKey || !bucketName || !isS3BucketNameValid)) || (provider == "hackclub-cdn" && !apiKey)){
+            if (!name  || name.trim() == "" || !limit || !limitUnit || !usageAlert || !visibility || !provider || (provider == "cloudflare-r2" && (!accessUrl || !accessKeyId || !secretAccessKey || !bucketName || !isS3BucketNameValid)) || (provider == "hackclub-cdn" && !apiKey)){
                 setSubmissionError({title: "Required fields missing or invalid", message: "Please fill in all required fields and ensure there are no warnings before submitting."});
                 return;
             }
@@ -70,7 +70,7 @@ export function CreateDatabasesForm({fetchedDatabases, createPerms}: {fetchedDat
                     } : provider == "hackclub-cdn" ? {
                         apiKey: apiKey
                     } : {},
-                    name,
+                    name: name.trim(),
                     limit: convertUnit(Number(limit), limitUnit, "b"),
                     usageAlert: Number(usageAlert),
                     visibility,
@@ -101,7 +101,7 @@ export function CreateDatabasesForm({fetchedDatabases, createPerms}: {fetchedDat
                             <Field>
                                 <FieldLabel>Name</FieldLabel>
                                 <Input type="text" value={name} onChange={(e)=> setName(e.target.value)} required/>
-                                {fetchedDatabases.find((x)=> x.name == name) ? <FieldError>A database with this name already exists.</FieldError>: <FieldDescription>The name of your database. Must be unique.</FieldDescription>}
+                                {fetchedDatabases.find((x)=> x.name == name.trim()) ? <FieldError>A database with this name already exists.</FieldError>: <FieldDescription>The name of your database. Must be unique.</FieldDescription>}
                             </Field>
                             <Field>
                                 <FieldLabel>Visibility</FieldLabel>
@@ -141,7 +141,7 @@ export function CreateDatabasesForm({fetchedDatabases, createPerms}: {fetchedDat
                                     <Input value={usageAlert} onChange={(e)=> setUsageAlert(Math.max(0, Math.min(Number(e.target.value) || 0, 100)).toString() || "0")} className="w-14 text-center mx-2"/>
                                     %
                                 </div>
-                                <FieldDescription>{Number(limit) == 0 ? "You will not receive any alerts." : `You will recieve alerts when the database exceeds ${Math.round((Number(usageAlert) / 100) * Number(limit))} ${limitUnit.toUpperCase()}.`}</FieldDescription>
+                                <FieldDescription>{Number(limit) * Number(usageAlert) == 0 ? "You will not receive any alerts." : `You will recieve alerts when the database exceeds ${((Number(usageAlert) / 100) * Number(limit)).toFixed(2)} ${limitUnit.toUpperCase()}.`}</FieldDescription>
                             </Field>
                         </FieldGroup>
                     </CardContent>

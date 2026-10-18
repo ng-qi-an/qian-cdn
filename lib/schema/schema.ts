@@ -1,4 +1,4 @@
-import { date, integer, jsonb, numeric, pgTable, text } from "drizzle-orm/pg-core";
+import { integer, timestamp, jsonb, numeric, pgTable, text } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
 export const databases = pgTable("databases", {
@@ -10,8 +10,8 @@ export const databases = pgTable("databases", {
     keys: jsonb("keys").$type<Record<string, string>>().notNull(),
     limit: numeric("limit", { mode: 'number' }).notNull(),
     alerts: jsonb("alerts").$type<any[]>().notNull(),
-    createdAt: date("created_at").defaultNow().notNull(),
-    updatedAt: date("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const applications = pgTable("applications", {
@@ -23,8 +23,8 @@ export const applications = pgTable("applications", {
     limit: numeric("limit", { mode: 'number' }).notNull(),
     status: text("status").notNull(),
     alerts: jsonb("alerts").$type<any[]>().notNull(),
-    createdAt: date("created_at").defaultNow().notNull(),
-    updatedAt: date("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
 
 export const files = pgTable("files", {
@@ -35,7 +35,7 @@ export const files = pgTable("files", {
     name: text("name").notNull(),
     contentType: text("content_type").notNull(),
     size: numeric("size", { mode: 'number' }).notNull(),
-    expiresAt: date("expires_at"),
-    createdAt: date("created_at").defaultNow().notNull(),
-    updatedAt: date("updated_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })

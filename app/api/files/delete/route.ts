@@ -9,6 +9,7 @@ import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { isCredentialError } from "@/lib/providers/s3/isCredentialError";
 import { Application } from "@/lib/schema/schemaTypes";
 import { and, eq, inArray } from "drizzle-orm";
+import { deleteFiles } from "@/lib/actions/files/deleteFiles";
 
 
 export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
@@ -32,54 +33,12 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
         if (!appData) {
             return errorToResponse(new UnauthorisedError());
         }
-        const filesFromDb = await db.select({id: filesDb.id, key: filesDb.key}).from(filesDb).where(and(inArray(filesDb.id, files), eq(filesDb.applicationId, appData.id)));
-        if (appData.database?.provider == "hackclub-cdn"){
-            const client = new HCDNClient(appData.database.keys.apiKey);
-            try {
-                const {deleted, failed} = await client.deleteFiles(filesFromDb.map(f => f.key));
-                if (deleted.length == 0){
-                    return errorToResponse(new InvalidConfigurationError("No files were deleted. Check that the files exist in the provider."));
-                }
-                await db.delete(filesDb).where(inArray(filesDb.key, deleted.map(d => d.id)));
-                const deletedFiles = filesFromDb.filter(f => deleted.find(d => d.id == f.key)).map(f => f.id);
-                const failedFiles = filesFromDb.filter(f => failed.includes(f.key)).map(f => f.id);
-                return Response.json({deleted: deletedFiles, failed: failedFiles});
-            } catch (error) {
-                if (error instanceof HCDNAuthenticationError){
-                    return errorToResponse(new UnauthorisedError("Could not connect to database provider. Please check your database key configurations."));
-                } else {
-                    console.error("Error uploading files to HCDN:", error);
-                    return errorToResponse(error);
-                }
-            }
-        } else if (appData.database?.provider == "cloudflare-r2" || appData.database?.provider == "amazon-s3") {
-            const client = getS3Client(appData.database.keys.accessUrl, appData.database.keys.accessKeyId, appData.database.keys.secretAccessKey);
-            try {
-                const response = await client.send(new DeleteObjectsCommand({
-                    Bucket: appData.database!.keys.bucketName,
-                    Delete: {
-                        Objects: filesFromDb.map((file)=> ({Key: file.key})),
-                    }
-                }));
-                if (!response.Deleted || response.Deleted.length == 0){
-                    return errorToResponse(new InvalidConfigurationError("No files were deleted. Check that the files exist in the provider."));
-                }
-                const deletedFiles = filesFromDb.filter(f => response.Deleted!.find(d => d.Key == f.key)).map(f => f.id);
-                await db.delete(filesDb).where(inArray(filesDb.id, deletedFiles));
-                const failedFiles = filesFromDb.filter(f => !response.Deleted!.find(d => d.Key == f.key)).map(f => f.id);
-                return Response.json({deleted: deletedFiles, failed: failedFiles});
-            } catch (error) {
-                console.log("Error uploading file to S3:", error);
-                if (isCredentialError(error)){
-                    return errorToResponse(new UnauthorisedError("Could not connect to database provider. Please check your database key configurations."));
-                } else {
-                    console.error("Error deleting files on S3:", error);
-                    return errorToResponse(error);
-                }
-            }
-        } else {
-            console.log(appData.database?.provider)
-            return errorToResponse(new InvalidConfigurationError("The api key's database provider is not supported for file uploads."));
+        try {
+            const response = await deleteFiles({filesFromDb: await db.select({id: filesDb.id, key: filesDb.key}).from(filesDb).where(and(inArray(filesDb.id, files), eq(filesDb.applicationId, appData.id))), keys: appData.database?.keys, provider: appData.database?.provider ?? ""});
+            return Response.json(response, {status: 200});
+        } catch (error) {
+            console.error("Error deleting files:", error);
+            return errorToResponse(error);
         }
     } catch (error) {
         console.error("Error processing file upload:", error);

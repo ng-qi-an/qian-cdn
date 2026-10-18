@@ -30,6 +30,9 @@ export default async function DatabasesRendered({searchParams}: {searchParams: P
                 {ownerId: !viewAllDbPerms.isAuthorised ? viewAllDbPerms.user.id : {isNotNull: true}},
                 {visibility: "public"}
             ]
+        },
+        orderBy: {
+            updatedAt: "desc"
         }
     })
     const personalDbs = fetchedDbs.filter((db) => db.ownerId == viewAllDbPerms.user.id);

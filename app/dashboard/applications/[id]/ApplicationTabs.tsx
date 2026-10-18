@@ -7,8 +7,6 @@ export default function ApplicationTabs({appId}: {appId: string}){
     const pathname = usePathname();
     const router = useRouter();
     const normalisedPathname = pathname.split("/")[pathname.split("/").length - 1]
-    
-    console.log("Normalised pathname:", normalisedPathname);
     return <div className="border-b overflow-auto scroll-fade-x scrollbar-none w-full shrink-0">
             <Tabs value={normalisedPathname} defaultValue={appId} onValueChange={(value) => {
             router.push(`/dashboard/applications/${appId}/${value == appId ? "" : value}`);

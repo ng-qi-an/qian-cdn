@@ -34,14 +34,14 @@ export default function DeleteFilesDialog({fileIds, appId, open, onOpenChange}: 
                                 return toast.add({
                                     title: "Error deleting files",
                                     description: error.message,
-                                    type: "destructive"
+                                    type: "error"
                                 })
                             } catch (error) {
                                 console.error("Error showing toast:", error);
                                 return toast.add({
                                     title: "Error deleting files",
                                     description: "An error occurred while deleting these files. Please try again.",
-                                    type: "destructive"
+                                    type: "error"
                                 })
                             }
                         }
@@ -52,7 +52,7 @@ export default function DeleteFilesDialog({fileIds, appId, open, onOpenChange}: 
                         toast.add({
                             title: "Error deleting files",
                             description: "An error occurred while deleting these files. Please try again.",
-                            type: "destructive"
+                            type: "error",
                         })
                     } finally {
                         setSubmitting(false);

@@ -35,11 +35,11 @@ export function CreateApplicationsForm({dbCreatePerms, fetchedDatabases, fetched
     return <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full gap-2 pt-4">
         <form className="w-full h-full flex flex-col min-h-0" onSubmit={async(e)=>{
             e.preventDefault()
-            if (!name || !databaseId){
+            if (!name || name.trim() == "" || !databaseId){
                 setSubmissionError({title: "Missing required fields", message: "Please fill in all required fields before submitting."});
                 return;
             }
-            if (fetchedDatabases.find(db => db.name == name)){
+            if (fetchedApps.find(app => app.name == name)){
                 return;
             }
             setIsSubmitting(true);
@@ -51,8 +51,8 @@ export function CreateApplicationsForm({dbCreatePerms, fetchedDatabases, fetched
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name,
-                    description: description || "No description provided.",
+                    name: name.trim(),
+                    description: description.trim() || "No description provided.",
                     databaseId
                 })
             });
@@ -104,7 +104,7 @@ export function CreateApplicationsForm({dbCreatePerms, fetchedDatabases, fetched
                             <Field>
                                 <FieldLabel>Name</FieldLabel>
                                 <Input required disabled={fetchedDatabases.length == 0} type="text" value={name} onChange={(e)=> setName(e.target.value)}/>
-                                {fetchedApps.find((app)=> app.name == name) ? <FieldError>A application with this name already exists.</FieldError> : <FieldDescription>The name of your application. Must be unique.</FieldDescription>}
+                                {fetchedApps.find((app)=> app.name == name.trim()) ? <FieldError>An application with this name already exists.</FieldError> : <FieldDescription>The name of your application. Must be unique.</FieldDescription>}
                             </Field>
                             <Field>
                                 <FieldLabel>Description</FieldLabel>

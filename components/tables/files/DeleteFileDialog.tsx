@@ -28,7 +28,7 @@ export default function DeleteFileDialog({fileId, open, onOpenChange}: {fileId: 
                             return toast.add({
                                 title: "Error deleting file",
                                 description: "An error occurred while deleting the file. Please try again.",
-                                type: "destructive"
+                                type: "error"
                             })
                         }
                         await revalidateData(window.location.pathname);
@@ -38,7 +38,7 @@ export default function DeleteFileDialog({fileId, open, onOpenChange}: {fileId: 
                         toast.add({
                             title: "Error deleting file",
                             description: "An error occurred while deleting the file. Please try again.",
-                            type: "destructive"
+                            type: "error"
                         })
                     } finally {
                         setSubmitting(false);
