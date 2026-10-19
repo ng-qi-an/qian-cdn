@@ -8,13 +8,15 @@ import SortedColumnHeader from "../SortedColumnHeader"
 import { User } from "better-auth"
 import { ApiKey } from "@better-auth/api-key"
 import AppLogAction from "./AppLogAction"
-import { UserRound, Zap } from "lucide-react"
+import Link from "next/link"
+import { UserRound } from "lucide-react"
 
 
 // Use `accessor` for data columns and `display` for columns without one.
 
 
-export const getLogsColumns = (type: "app")=>{
+
+export const getLogsColumns = (type: "app", showUserLink: boolean)=>{
     let columnHelper;
     let extraColumns: any[] = []
     if (type === "app") {
@@ -29,11 +31,11 @@ export const getLogsColumns = (type: "app")=>{
             }),
             columnHelper.display({
                 id: "subject",
-                header: ({table})=> <p className="flex items-center gap-1"><UserRound className="size-4"/> Action by</p>,
+                header: ({table})=> <p className="flex items-center gap-1">Action by</p>,
                 cell: ({row})=>{
                     const log = row.original
                     if (log.fromUserId) {
-                        return log.fromUser.name
+                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-1"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
                     } else if (log.fromApiKeyId) {
                         return log.fromApiKey.name
                     }

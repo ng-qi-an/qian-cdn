@@ -3,6 +3,7 @@ import { LogsDataTable } from "@/components/tables/logs/data-table";
 import { db } from "@/lib/db";
 import { Suspense } from "react";
 import LogsPageClient from "./client";
+import { userHasPermissionServer } from "@/lib/permissionHelpers";
 
 export default async function ApplicationLogs({params}: {params: Promise<{id: string}>}){
     return <Suspense>
@@ -12,6 +13,7 @@ export default async function ApplicationLogs({params}: {params: Promise<{id: st
 
 async function ApplicationLogsRender({params}: {params: Promise<{id: string}>}){
     const {id} = await params
+    const viewAllPerms = await userHasPermissionServer({applications: ["viewAll"]})
     const logs = await db.query.appLogs.findMany({
         where: {
             applicationId: id
@@ -24,5 +26,5 @@ async function ApplicationLogsRender({params}: {params: Promise<{id: string}>}){
             createdAt: "desc"
         }
     })
-    return <LogsPageClient logs={logs}/>
+    return <LogsPageClient logs={logs} showUserLink={viewAllPerms.isAuthorised}/>
 }

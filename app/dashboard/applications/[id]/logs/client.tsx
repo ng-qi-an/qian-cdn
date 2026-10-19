@@ -11,6 +11,6 @@ type ApplicationLog = AppLog & {
     fromApiKey: Omit<typeof apikey.$inferSelect, "key"> | null;
 };
 
-export default function LogsPageClient({logs}: {logs: ApplicationLog[]}){
-    return <LogsDataTable columns={getLogsColumns("app")} data={logs} type="app"/>
+export default function LogsPageClient({logs, showUserLink}: {logs: ApplicationLog[], showUserLink: boolean}){
+    return <LogsDataTable columns={getLogsColumns("app", showUserLink)} data={logs} type="app"/>
 }
