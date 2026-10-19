@@ -1,5 +1,6 @@
 import { integer, timestamp, jsonb, numeric, pgTable, text } from "drizzle-orm/pg-core";
-import { user } from "./auth-schema";
+import { apikey, user } from "./auth-schema";
+import type { AppLogCode } from "../actions/logs/codes";
 
 export const databases = pgTable("databases", {
     id: text("id").primaryKey(),
@@ -38,4 +39,14 @@ export const files = pgTable("files", {
     expiresAt: timestamp("expires_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
+
+export const appLogs = pgTable("app_logs", {
+    id: text("id").primaryKey(),
+    applicationId: text("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }),
+    fromUserId: text("from_user_id").references(() => user.id, { onDelete: "no action" }),
+    fromApiKeyId: text("from_api_key_id").references(() => apikey.id, { onDelete: "no action" }),
+    code: text("type").$type<AppLogCode>().notNull(),
+    data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
 })

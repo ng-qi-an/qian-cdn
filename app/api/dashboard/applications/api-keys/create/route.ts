@@ -1,3 +1,4 @@
+import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
@@ -27,6 +28,7 @@ export const POST = verifyUser(async(req, ctx, user) => {
                 }
             }
         })
+        await makeAppLog({appId, code: "APIKEY_CREATED", userId: user.id, data: {apiKeyId: result.id, apiKeyName: result.name}})
         return Response.json({ message: "API key created successfully", key: result.key }, { status: 200 });
     } catch (error) {
         console.error(error)
