@@ -30,7 +30,8 @@ export const relations = defineRelationsPart({ applications, user, files, databa
             from: r.applications.databaseId,
             to: r.databases.id
         }),
-        files: r.many.files()
+        files: r.many.files(),
+        appLogs: r.many.appLogs()
     },
     user: {
         applications: r.many.applications(),
@@ -47,6 +48,10 @@ export const relations = defineRelationsPart({ applications, user, files, databa
         fromUser: r.one.user({
             from: r.appLogs.fromUserId,
             to: r.user.id
+        }),
+        application: r.one.applications({
+            from: r.appLogs.applicationId,
+            to: r.applications.id
         })
     }
 }))

@@ -12,5 +12,7 @@ type ApplicationLog = AppLog & {
 };
 
 export default function LogsPageClient({logs, showUserLink}: {logs: ApplicationLog[], showUserLink: boolean}){
-    return <LogsDataTable columns={getLogsColumns("app", showUserLink)} data={logs} type="app"/>
+    return <div className="pt-4 h-full relative min-w-0 max-w-full">
+        <LogsDataTable columns={getLogsColumns({type: "app", showUserLink})} data={logs} type="app"/>
+    </div>
 }

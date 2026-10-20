@@ -54,13 +54,13 @@ export default function AppLogAction({log}: {log: AppLog}){
             text = "An unknown action was performed."
 
     }
-    return <div className="flex items-center gap-3">
+    return <div className="flex items-center gap-3 flex-1 min-w-sm group">
         <div className={`size-10 shrink-0 flex items-center justify-center border rounded-full ${status == "destructive" ? "border-destructive/50 text-destructive bg-destructive/5" : ""}`}>
             <Icon className="size-4" />
         </div>
         <div>
             <p className="font-medium">{header}</p>
-            <p className="text-sm text-muted-foreground">{text}</p>
+            <p className="text-sm text-muted-foreground text-wrap line-clamp-1 group-hover:line-clamp-none">{text}</p>
         </div>
     </div>
 }

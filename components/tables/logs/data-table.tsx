@@ -16,7 +16,7 @@ import { features, type DataTableFeatures } from "../features"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
-import { ListFilter } from "lucide-react"
+import { AppWindowMac, ListFilter } from "lucide-react"
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox"
 import { appLogCodes } from "@/lib/actions/logs/codes"
 
@@ -24,6 +24,13 @@ interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
   type: "app"
+}
+
+type LogWithApplication = {
+  application?: {
+    id: string | number
+    name: string
+  }
 }
 
 export function LogsDataTable<TData extends RowData>({
@@ -41,7 +48,6 @@ export function LogsDataTable<TData extends RowData>({
     features,
     data,
     columns,
-    autoResetPageIndex: false,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -52,15 +58,59 @@ export function LogsDataTable<TData extends RowData>({
       columnFilters
     }
   })
+  const apps: { label: string; value: string }[] = []
+  const appIds = new Set<string>()
+
+  data.forEach((log) => {
+    const app = (log as TData & LogWithApplication).application
+    if (!app) return
+
+    const value = String(app.id)
+    if (!appIds.has(value)) {
+      appIds.add(value)
+      apps.push({ label: String(app.name), value })
+    }
+  })
+  const applicationColumn = table.getColumn("applicationId")
+  const codeColumn = table.getColumn("code")
+  const selectedApplicationId = applicationColumn?.getFilterValue() as string | undefined
+  const selectedApplication = apps.find((app) => app.value === selectedApplicationId) ?? null
+  const selectedCode = codeColumn?.getFilterValue() as string | undefined
+
   return <div className="flex flex-col h-full">
       <div className="flex items-center mb-2 pt-2 gap-2">
+        {apps.length > 0 && <>
+        <AppWindowMac className="size-4 text-muted-foreground"/>
+        <Combobox
+          items={apps}
+          value={selectedApplication}
+          itemToStringValue={(app) => app.label}
+          onValueChange={(app) => applicationColumn?.setFilterValue(app?.value ?? undefined)}
+        >
+          <ComboboxInput showClear className="w-full max-w-xs" placeholder="Filter applications"/>
+          <ComboboxContent>
+            <ComboboxEmpty>No results.</ComboboxEmpty>
+            <ComboboxList>
+              {(item) => (
+                <ComboboxItem key={item.value} value={item}>
+                  {item.label}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        </>}
         <ListFilter className="size-4 text-muted-foreground"/>
-        <Combobox items={type == "app" ? appLogCodes : ["?"]} onValueChange={(value) => table.getColumn("code")?.setFilterValue(value)}>
+        <Combobox
+          items={type === "app" ? appLogCodes : ["?"]}
+          value={selectedCode ?? null}
+          onValueChange={(value) => codeColumn?.setFilterValue(value ?? undefined)}
+        >
           <ComboboxInput showClear className="w-full max-w-xs" placeholder="Filter actions"/>
           <ComboboxContent>
             <ComboboxEmpty>No results.</ComboboxEmpty>
             <ComboboxList>
-              {(item)=>(
+              {(item) => (
                 <ComboboxItem key={item} value={item}>
                   {item}
                 </ComboboxItem>

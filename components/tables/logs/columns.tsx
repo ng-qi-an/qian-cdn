@@ -10,17 +10,16 @@ import { ApiKey } from "@better-auth/api-key"
 import AppLogAction from "./AppLogAction"
 import Link from "next/link"
 import { Key, UserRound } from "lucide-react"
+import { availableServices } from "@/lib/services"
 
 
 // Use `accessor` for data columns and `display` for columns without one.
 
-
-
-export const getLogsColumns = (type: "app", showUserLink: boolean)=>{
+export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type: "app", showUserLink: boolean, showAppOriginColumn?: boolean})=>{
     let columnHelper;
     let extraColumns: any[] = []
     if (type === "app") {
-        columnHelper = createColumnHelper<DataTableFeatures, AppLog & {fromUser: User, fromApiKey: ApiKey}>()
+        columnHelper = createColumnHelper<DataTableFeatures, AppLog & {fromUser: User, fromApiKey: ApiKey, application?: {name: string, id: string, database: {provider: string} | null} | null}>()
         extraColumns = [
             columnHelper.accessor("code", {
                 header: ({table})=> <p className="flex items-center gap-1">Action</p>,
@@ -40,8 +39,18 @@ export const getLogsColumns = (type: "app", showUserLink: boolean)=>{
                         return <Link href={`/dashboard/applications/${log.applicationId}/api-keys`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><Key className="size-4"/> {log.fromApiKey.name}</p></Link>
                     }
                 }
-            })
+            }),
         ]
+        if (showAppOriginColumn) {
+            extraColumns.push(columnHelper.accessor("applicationId", {
+                header: ({table})=> <p className="flex items-center gap-1">Application</p>,
+                cell: ({row}) => {
+                    const log = row.original
+                    const provider = availableServices.find(s => s.id === log.application?.database?.provider)
+                    return <Link href={`/dashboard/applications/${log.applicationId}`} className={`hover:underline flex items-center gap-2`} title="View application details">{provider && <provider.icon className="size-4"/>}<p className="flex items-center gap-2">{log.application?.name ?? "Unknown app"}</p></Link>
+                }
+            }))
+        }
     } else {
         throw new Error("Choose a correct type")
     }
