@@ -118,7 +118,7 @@ export function FilesDataTable<TData extends RowData>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} highlightOnHover={false}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>

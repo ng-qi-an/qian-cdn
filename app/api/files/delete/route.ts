@@ -10,6 +10,7 @@ import { isCredentialError } from "@/lib/providers/s3/isCredentialError";
 import { Application } from "@/lib/schema/schemaTypes";
 import { and, eq, inArray } from "drizzle-orm";
 import { deleteFiles } from "@/lib/actions/files/deleteFiles";
+import { makeAppLog } from "@/lib/actions/logs/appLog";
 
 
 export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
@@ -35,6 +36,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
         }
         try {
             const response = await deleteFiles({filesFromDb: await db.select({id: filesDb.id, key: filesDb.key}).from(filesDb).where(and(inArray(filesDb.id, files), eq(filesDb.applicationId, appData.id))), keys: appData.database?.keys, provider: appData.database?.provider ?? ""});
+            await makeAppLog({appId: appData.id, code: "FILE_DELETED", data: {files: response.deleted}, userId: user?.id, apiKeyId: apiKey?.id});
             return Response.json(response, {status: 200});
         } catch (error) {
             console.error("Error deleting files:", error);

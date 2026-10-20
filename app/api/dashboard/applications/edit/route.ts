@@ -1,3 +1,4 @@
+import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissionHelpers";
@@ -29,5 +30,6 @@ export const PATCH = verifyUser(async(req: Request, ctx, user) => {
         console.error(error);
         return Response.json({ error: "INTERNAL", message: "Unexpected error occurred while updating application."}, {status: 500});
     }
+    await makeAppLog({appId: data.appId, code: "APPLICATION_EDITED", data: payload, userId: user.id});
     return Response.json({ message: "Application updated successfully", id: data.appId }, { status: 200 });
 })

@@ -10,6 +10,7 @@ import { getS3Client } from "@/lib/providers/s3/getClient";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { isCredentialError } from "@/lib/providers/s3/isCredentialError";
 import { Application } from "@/lib/schema/schemaTypes";
+import { makeAppLog } from "@/lib/actions/logs/appLog";
 
 const maxFileSize = convertUnit(0.5, "gb", "b"); // 0.5 GB in bytes
 const maxFiles = 20; // Maximum number of files allowed
@@ -55,6 +56,7 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                     size: upload.size
                 }))
                 await db.insert(filesDb).values(normalisedUploads);
+                await makeAppLog({appId: appData.id, code: "FILE_CREATED", data: {files: normalisedUploads.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, apiKeyId: apiKey?.id});
                 return Response.json({uploads: normalisedUploads, failed});
             } catch (error) {
                 if (error instanceof HCDNAuthenticationError){
@@ -101,6 +103,7 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                 return errorToResponse(new InvalidConfigurationError("All file uploads failed. Please check your configuration and try again."));
             }
             await db.insert(filesDb).values(successFiles);
+            await makeAppLog({appId: appData.id, code: "FILE_CREATED", data: {files: successFiles.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, apiKeyId: apiKey?.id});
             return Response.json({uploads: successFiles, failed: failedFiles});
         } else {
             console.log(appData.database?.provider)

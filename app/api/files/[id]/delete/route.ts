@@ -1,3 +1,4 @@
+import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError, UnauthorisedError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyAPIKeyOrUser } from "@/lib/permissionHelpers";
@@ -57,6 +58,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id
             return errorToResponse(new InvalidConfigurationError("The api key's database provider is not supported for file uploads."));
         }
         await db.delete(files).where(eq(files.id, id));
+        await makeAppLog({appId: file.applicationId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, apiKeyId: apiKey?.id});
         return Response.json({ message: "File deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Error deleting file:", error);

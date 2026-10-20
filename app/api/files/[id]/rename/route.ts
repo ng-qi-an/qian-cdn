@@ -1,3 +1,4 @@
+import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError, UnauthorisedError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyAPIKeyOrUser } from "@/lib/permissionHelpers";
@@ -39,6 +40,7 @@ export const PATCH = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id:
             }
         }
         await db.update(files).set({name: data.name}).where(eq(files.id, id));
+        await makeAppLog({appId: file.applicationId, code: "FILE_EDITED", data: {oldName: file.name, newName: data.name}, userId: user?.id, apiKeyId: apiKey?.id});
         return Response.json({ message: "File renamed successfully", newName: data.name }, { status: 200 });
     } catch (error) {
         console.error("Error renaming file:", error);

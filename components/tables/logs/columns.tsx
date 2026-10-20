@@ -9,7 +9,7 @@ import { User } from "better-auth"
 import { ApiKey } from "@better-auth/api-key"
 import AppLogAction from "./AppLogAction"
 import Link from "next/link"
-import { UserRound } from "lucide-react"
+import { Key, UserRound } from "lucide-react"
 
 
 // Use `accessor` for data columns and `display` for columns without one.
@@ -35,9 +35,9 @@ export const getLogsColumns = (type: "app", showUserLink: boolean)=>{
                 cell: ({row})=>{
                     const log = row.original
                     if (log.fromUserId) {
-                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-1"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
+                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
                     } else if (log.fromApiKeyId) {
-                        return log.fromApiKey.name
+                        return <Link href={`/dashboard/applications/${log.applicationId}/api-keys`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><Key className="size-4"/> {log.fromApiKey.name}</p></Link>
                     }
                 }
             })
