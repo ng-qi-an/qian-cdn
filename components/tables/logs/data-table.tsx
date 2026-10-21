@@ -100,7 +100,7 @@ export function LogsDataTable<TData extends RowData>({
           </ComboboxContent>
         </Combobox>
         </>}
-        <ListFilter className="size-4 text-muted-foreground"/>
+        <ListFilter className="ml-2 size-4 text-muted-foreground"/>
         <Combobox
           items={type === "app" ? appLogCodes : ["?"]}
           value={selectedCode ?? null}

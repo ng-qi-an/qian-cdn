@@ -1,11 +1,10 @@
 'use client';
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppLog } from "@/lib/schema/schemaTypes";
 import { CircleQuestionMark, FilePen, FilePlusCorner, FileXCorner, KeyIcon, Pen, Trash } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
 export default function AppLogAction({log}: {log: AppLog}){
-    const {id} = useParams();
     let Icon;
     let header;
     let text;
@@ -14,7 +13,7 @@ export default function AppLogAction({log}: {log: AppLog}){
         case "APIKEY_CREATED":
             Icon = KeyIcon
             header = "API Key created"
-            text = <>A new API key, "<Link title="View api key details" href={`/dashboard/applications/${id}/api-keys`} className="underline hover:text-foreground">{log.data.apiKeyName}</Link>" was created.</>
+            text = <>A new API key, "<Link title="View api key details" href={`/dashboard/applications/${log.applicationId}/api-keys`} className="underline hover:text-foreground">{log.data.apiKeyName}</Link>" was created.</>
             break;
         case "APIKEY_DELETED":
             Icon = Trash
@@ -25,7 +24,7 @@ export default function AppLogAction({log}: {log: AppLog}){
         case "APIKEY_EDITED":
             Icon = Pen
             header = "API Key edited"
-            text = <>   <Link title="View api key details" href={`/dashboard/applications/${id}/api-keys`} className="underline hover:text-foreground">{log.data.oldApiKeyName}</Link> was {log.data.oldApiKeyName != log.data.apiKeyName ? `renamed to "${log.data.apiKeyName}"` : "was not renamed"}{log.data.oldApiKeyExpiry != log.data.apiKeyExpiry ? ` and its expiry date was changed from ${log.data.oldApiKeyExpiry ? new Date(log.data.oldApiKeyExpiry).toLocaleString() : "never"} to ${log.data.apiKeyExpiry ? new Date(log.data.apiKeyExpiry).toLocaleString() : "never"}` : ""}.</>
+            text = <>   <Link title="View api key details" href={`/dashboard/applications/${log.applicationId}/api-keys`} className="underline hover:text-foreground">{log.data.oldApiKeyName}</Link> was {log.data.oldApiKeyName != log.data.apiKeyName ? `renamed to "${log.data.apiKeyName}"` : "was not renamed"}{log.data.oldApiKeyExpiry != log.data.apiKeyExpiry ? ` and its expiry date was changed from ${log.data.oldApiKeyExpiry ? new Date(log.data.oldApiKeyExpiry).toLocaleString() : "never"} to ${log.data.apiKeyExpiry ? new Date(log.data.apiKeyExpiry).toLocaleString() : "never"}` : ""}.</>
             break;
         case "FILE_CREATED":
             Icon = FilePlusCorner
@@ -60,7 +59,14 @@ export default function AppLogAction({log}: {log: AppLog}){
         </div>
         <div>
             <p className="font-medium">{header}</p>
-            <p className="text-sm text-muted-foreground text-wrap line-clamp-1 group-hover:line-clamp-none">{text}</p>
+            <Tooltip>
+                <TooltipTrigger delay={600} render={
+                    <p className="text-sm text-muted-foreground text-wrap line-clamp-1 cursor-default">{text}</p>
+                }/>
+                <TooltipContent>
+                    <p>{text}</p>
+                </TooltipContent>
+            </Tooltip>
         </div>
     </div>
 }

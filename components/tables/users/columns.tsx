@@ -11,6 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import SortedColumnHeader from "../SortedColumnHeader"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { authClient, roles } from "@/lib/auth-client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "@/components/ui/toast";
 
 
 // Use `accessor` for data columns and `display` for columns without one.
@@ -51,24 +54,51 @@ export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUs
         columnHelper.accessor("name", {
             header: ({column})=> <SortedColumnHeader column={column}>User</SortedColumnHeader>,
             cell: ({row}) => {
-                return <Link href={`/dashboard/admin/users/${row.original.id}`} title="View user details">
-                    <div className="flex items-center cursor-pointer">
-                        <Avatar className="h-8 w-8 rounded-lg mr-3">
-                            <AvatarImage src={row.original.image || undefined} alt={row.original.name} />
-                            <AvatarFallback className="rounded-full">{row.original.name}</AvatarFallback>
-                        </Avatar>
-                        <div>
+                const nameParts = row.original.name.split(" ")
+                const initials = (nameParts[0].charAt(0) + (nameParts[1] ? nameParts[1].charAt(0) : "")).toUpperCase()
+                return <div className="flex items-center">
+                    <Avatar className="h-8 w-8 rounded-lg mr-3">
+                        <AvatarImage src={row.original.image || undefined} alt={row.original.name} />
+                        <AvatarFallback className="rounded-full">{initials}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <Link href={`/dashboard/admin/users/${row.original.id}`} title="View user details">
                             <p>{row.original.name}</p>
-                            <p className="text-muted-foreground">{row.original.email}</p>
-                        </div>
+                        </Link>
+                        <p className="text-muted-foreground">{row.original.email}</p>
                     </div>
-                </Link>
+                </div>
             }
         }),
         columnHelper.accessor("role", {
             header: ({column}) => <SortedColumnHeader column={column}>Role</SortedColumnHeader>,
             cell: ({row}) => {
-                return row.original.role
+                const [role, setRole] = useState(row.original.role)
+                return <Select disabled={row.original.id === user.id || (user.role == "admin" && (row.original.role == "superAdmin" || row.original.role == "admin"))} items={roles.map((role)=> ({label: role.name, value: role.id}))} value={role} onValueChange={async (x)=>{
+                    setRole(x)
+                    if (!x) return
+                    const { data, error } = await authClient.admin.setRole({
+                        userId: row.original.id,
+                        role: x,
+                    });
+                    if (error) {
+                        toast.add({
+                            title: "Error",
+                            description: error.message,
+                            type: "error"
+                        })
+                    }
+                    
+                }}>
+                    <SelectTrigger className="w-42">
+                        <SelectValue/>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {roles.map((role)=>{
+                            return <SelectItem disabled={user.role == "admin" && (role.id == "superAdmin" || role.id == "admin")} key={role.id} value={role.id}>{role.name}</SelectItem>
+                        })}
+                    </SelectContent>
+                </Select>
             }
         }),
         columnHelper.accessor("createdAt", {

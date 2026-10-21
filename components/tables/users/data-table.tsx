@@ -35,7 +35,8 @@ export function UsersDataTable<TData extends RowData>({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [openDeleteFiles, setOpenDeleteFiles] = useState(false);
+  const [openDeleteUsers, setOpenDeleteUsers] = useState(false);
+  const [openBanUsers, setOpenBanUsers] = useState(false);
   const table = useTable({
     features,
     data,
@@ -54,7 +55,7 @@ export function UsersDataTable<TData extends RowData>({
     }
   })
   return <div className="flex flex-col h-full">
-      <div className="flex items-center mb-2 justify-between">
+      <div className="flex items-center mb-2 pt-4 justify-between">
         <InputGroup className="w-full max-w-xs">
           <InputGroupAddon align="inline-start">
             <Search/>
@@ -142,7 +143,8 @@ export function UsersDataTable<TData extends RowData>({
           {table.getFilteredRowModel().rows.length} row(s) selected
         </p>
         <Button size="xs" variant="outline" onClick={()=> table.resetRowSelection()}>Unselect</Button>
-        <Button size="xs" variant="destructive" onClick={()=> setOpenDeleteFiles(true)}>Delete</Button>
+        <Button size="xs" variant="destructive" onClick={()=> setOpenBanUsers(true)}>Ban</Button>
+        <Button size="xs" variant="destructive" onClick={()=> setOpenDeleteUsers(true)}>Delete</Button>
       </div>}
     </div>
 }
