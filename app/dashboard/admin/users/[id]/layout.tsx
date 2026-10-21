@@ -44,7 +44,7 @@ export default async function UserLayout({children, params}: {children: React.Re
                     <Button className="w-full" size="sm" variant="destructive"><Trash/> Delete</Button>
                 </div>
             </div>
-            <div className="ml-4 mt-4 lg:mt-0 w-full">
+            <div className="lg:ml-6 mt-4 lg:mt-0 w-full">
                 <UserTabs userId={id}/>
                 {children}
             </div>
