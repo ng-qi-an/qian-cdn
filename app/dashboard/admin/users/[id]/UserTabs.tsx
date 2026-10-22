@@ -13,7 +13,6 @@ export default function UserTabs({userId}: {userId: string}){
         }}> 
             <TabsList variant="line" className="min-w-140 w-full">
                 <TabsTrigger value={userId}><LayoutGrid/> Overview</TabsTrigger>
-                <TabsTrigger value="files"><FolderOpen/>Files</TabsTrigger>
                 <TabsTrigger value="owned"><Archive />Owned</TabsTrigger>
                 <TabsTrigger value="logs"><Logs/>Logs</TabsTrigger>
             </TabsList>

@@ -32,7 +32,6 @@ export const files = pgTable("files", {
     id: text("id").primaryKey(),
     applicationId: text("application_id").notNull(),
     databaseId: text("database_id").notNull(),
-    ownerId: text("owner_id").notNull(),
     key: text("key").notNull(),
     name: text("name").notNull(),
     contentType: text("content_type").notNull(),
