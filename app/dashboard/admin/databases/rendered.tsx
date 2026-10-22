@@ -43,7 +43,7 @@ export default async function DatabasesRendered({searchParams}: {searchParams: P
         <Label className="text-sm mt-8">Created by you</Label>
         {personalDbs.length > 0 ? <div className={`grid ${layout == 'list' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'} mt-3`}>
             {personalDbs.map((db, index) => <DatabaseItem length={personalDbs.length} key={db.id} index={index} db={db} layout={layout || 'grid'}/>)}
-        </div> : <Empty className="border mt-4 h-full">
+        </div> : <Empty className="border mt-4 h-full flex-0">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
                     <Database/>
@@ -58,7 +58,7 @@ export default async function DatabasesRendered({searchParams}: {searchParams: P
         <Label className="text-sm mt-8">Other public databases</Label>
         {publicDbs.length > 0 ? <div className={`grid ${layout == 'list' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'} mt-3`}>
             {publicDbs.map((db, index) => <DatabaseItem length={publicDbs.length} key={db.id} index={index} db={db} layout={layout || 'grid'}/>)}
-        </div> : <Empty className="border mt-4 h-full">
+        </div> : <Empty className="border mt-4 h-full flex-0">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
                     <Database/>
@@ -87,7 +87,7 @@ export default async function DatabasesRendered({searchParams}: {searchParams: P
                 <Database/>
             </EmptyMedia>
             <EmptyTitle>No databases yet</EmptyTitle>
-            <EmptyDescription>You havent created a database yet. Get started by creating one below.</EmptyDescription>
+            <EmptyDescription>You don't have a database yet. Get started by creating one below.</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
             <Button nativeButton={false} render={<Link href="/dashboard/admin/databases/create"/>}>Create Database</Button>

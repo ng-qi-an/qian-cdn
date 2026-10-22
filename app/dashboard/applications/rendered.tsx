@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { db } from "@/lib/db";
 import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers";
-import { Database } from "lucide-react";
+import { AppWindowMac } from "lucide-react";
 import Link from "next/link";
 import { Label } from "@/components/ui/label";
 import ApplicationItem from "./ApplicationItem";
@@ -43,10 +43,10 @@ export default async function ApplicationRendered({searchParams}: {searchParams:
         <Label className="text-sm mt-8">Created by you</Label>
         {personalApps.length > 0 ? <div className={`grid ${layout == 'list' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'} mt-3`}>
             {personalApps.map((app, index) => <ApplicationItem showUserAndDB={viewAllAppsPerms.isAuthorised} length={personalApps.length} key={app.id} index={index} app={app} layout={layout || 'grid'}/>)}
-        </div> : <Empty className="border mt-4 h-full">
+        </div> : <Empty className="border mt-4 flex-0">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
-                    <Database/>
+                    <AppWindowMac/>
                 </EmptyMedia>
                 <EmptyTitle>No applications yet</EmptyTitle>
                 <EmptyDescription>You havent created your own application yet. Get started by creating one below.</EmptyDescription>
@@ -59,10 +59,10 @@ export default async function ApplicationRendered({searchParams}: {searchParams:
         <Label className="text-sm mt-8">Other users</Label>
         {othersApps.length > 0 ? <div className={`grid ${layout == 'list' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'} mt-3`}>
             {othersApps.map((app, index) => <ApplicationItem showUserAndDB={viewAllAppsPerms.isAuthorised} length={othersApps.length} key={app.id} index={index} app={app} layout={layout || 'grid'}/>)}
-        </div> : <Empty className="border mt-4">
+        </div> : <Empty className="border mt-4 flex-0">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
-                    <Database/>
+                    <AppWindowMac/>
                 </EmptyMedia>
                 <EmptyTitle>No applications yet</EmptyTitle>
                 <EmptyDescription>No one else has created an application.</EmptyDescription>
@@ -72,10 +72,10 @@ export default async function ApplicationRendered({searchParams}: {searchParams:
     </>: <Empty className="border mt-4 h-full">
         <EmptyHeader>
             <EmptyMedia variant="icon">
-                <Database/>
+                <AppWindowMac/>
             </EmptyMedia>
             <EmptyTitle>No applications yet</EmptyTitle>
-            <EmptyDescription>You havent created a applications yet. Get started by creating one below.</EmptyDescription>
+            <EmptyDescription>You don't have an application yet. Get started by creating one below.</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
             <Button nativeButton={false} render={<Link href="/dashboard/applications/create"/>}>Create Application</Button>

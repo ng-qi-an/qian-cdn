@@ -2,7 +2,7 @@ import { Label } from "@/components/ui/label";
 import { db } from "@/lib/db";
 import DatabaseItem from "../../../databases/DatabaseItem";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
-import { Database } from "lucide-react";
+import { AppWindowMac, Database } from "lucide-react";
 import ApplicationItem from "@/app/dashboard/applications/ApplicationItem";
 
 export default async function RenderedUserOwnedPage({params, searchParams}: {params: Promise<{id: string}>, searchParams: Promise<{layout?: string | undefined}>}){
@@ -77,7 +77,7 @@ export default async function RenderedUserOwnedPage({params, searchParams}: {par
         </div> : <Empty className="border mt-4">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
-                    <Database/>
+                    <AppWindowMac/>
                 </EmptyMedia>
                 <EmptyTitle>No applications yet</EmptyTitle>
                 <EmptyDescription>This user has not created any applications yet.</EmptyDescription>
