@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
-import { errorToResponse } from "@/lib/permissionHelpers";
+import { errorToResponse } from "@/lib/permissions/serverPermissionHelpers";
 import { getS3Client } from "@/lib/providers/s3/getClient";
 import { isCredentialError } from "@/lib/providers/s3/isCredentialError";
 import { GetObjectCommand } from "@aws-sdk/client-s3";

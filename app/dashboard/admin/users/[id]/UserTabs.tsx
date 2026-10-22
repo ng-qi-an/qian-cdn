@@ -1,6 +1,6 @@
 'use client';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FolderOpen, Key, LayoutGrid, Logs, Settings } from "lucide-react";
+import { Archive, FolderOpen, Key, LayoutGrid, Logs, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function UserTabs({userId}: {userId: string}){
@@ -14,7 +14,7 @@ export default function UserTabs({userId}: {userId: string}){
             <TabsList variant="line" className="min-w-140 w-full">
                 <TabsTrigger value={userId}><LayoutGrid/> Overview</TabsTrigger>
                 <TabsTrigger value="files"><FolderOpen/>Files</TabsTrigger>
-                <TabsTrigger value="api-keys"><Key />Owned</TabsTrigger>
+                <TabsTrigger value="owned"><Archive />Owned</TabsTrigger>
                 <TabsTrigger value="logs"><Logs/>Logs</TabsTrigger>
             </TabsList>
         </Tabs>

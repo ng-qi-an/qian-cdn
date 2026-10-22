@@ -1,7 +1,7 @@
 import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
-import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissionHelpers";
+import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissions/serverPermissionHelpers";
 import { applications } from "@/lib/schema/schema";
 import { and, eq, isNotNull } from "drizzle-orm";
 

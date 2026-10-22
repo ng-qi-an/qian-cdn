@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissionHelpers";
+import { userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissions/serverPermissionHelpers";
 import { HCDNAuthenticationError } from "@/lib/providers/hcdn/errors";
 import { getHCDNClient } from "@/lib/providers/hcdn/getClient";
 import { getS3Client } from "@/lib/providers/s3/getClient";

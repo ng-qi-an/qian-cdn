@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissionHelpers";
+import { userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissions/serverPermissionHelpers";
 import { applications } from "@/lib/schema/schema";
 import { generateId } from "better-auth";
 

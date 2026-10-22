@@ -14,20 +14,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { authClient, roles } from "@/lib/auth-client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
+import { checkUserHasHigherPerms } from "@/lib/permissions/permissionHelpers";
+import { Badge } from "@/components/ui/badge";
 
 
 // Use `accessor` for data columns and `display` for columns without one.
 const columnHelper = createColumnHelper<DataTableFeatures, User>()
 
 export type UserColumnsProps = {
-    impersonateUserAuth: boolean,
-    impersonateAdminAuth: boolean,
     banUserAuth: boolean,
     deleteUserAuth: boolean,
     user: User
 }
 
-export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUserAuth, deleteUserAuth, user}: UserColumnsProps){
+export function getUserColumns({banUserAuth, deleteUserAuth, user}: UserColumnsProps){
     return columnHelper.columns([
         columnHelper.display({
             id: "select",
@@ -62,8 +62,9 @@ export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUs
                         <AvatarFallback className="rounded-full">{initials}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <Link href={`/dashboard/admin/users/${row.original.id}`} title="View user details">
-                            <p>{row.original.name}</p>
+                        <Link href={checkUserHasHigherPerms(user.role!, row.original.role!) ? `/dashboard/admin/users/${row.original.id}` : "#"} title={checkUserHasHigherPerms(user.role!, row.original.role!) ? "View user details" : "No permission to view user"} className={`flex items-center ${checkUserHasHigherPerms(user.role!, row.original.role!) ? "group" : "cursor-not-allowed"}`}>
+                            <p className={'group-hover:underline'}>{row.original.name}</p>
+                            {row.original.banned && <Badge variant="destructive" className="ml-2 bg-destructive/10 px-1">Banned</Badge>}
                         </Link>
                         <p className="text-muted-foreground">{row.original.email}</p>
                     </div>
@@ -74,7 +75,7 @@ export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUs
             header: ({column}) => <SortedColumnHeader column={column}>Role</SortedColumnHeader>,
             cell: ({row}) => {
                 const [role, setRole] = useState(row.original.role)
-                return <Select disabled={row.original.id === user.id || (user.role == "admin" && (row.original.role == "superAdmin" || row.original.role == "admin"))} items={roles.map((role)=> ({label: role.name, value: role.id}))} value={role} onValueChange={async (x)=>{
+                return <Select disabled={row.original.id === user.id || !checkUserHasHigherPerms(user.role!, row.original.role!)} items={roles.map((role)=> ({label: role.name, value: role.id}))} value={role} onValueChange={async (x)=>{
                     setRole(x)
                     if (!x) return
                     const { data, error } = await authClient.admin.setRole({
@@ -87,6 +88,12 @@ export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUs
                             description: error.message,
                             type: "error"
                         })
+                    } else {
+                        toast.add({
+                            title: "Success",
+                            description: "User role updated successfully.",
+                            type: "success"
+                        })
                     }
                     
                 }}>
@@ -95,7 +102,7 @@ export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUs
                     </SelectTrigger>
                     <SelectContent>
                         {roles.map((role)=>{
-                            return <SelectItem disabled={user.role == "admin" && (role.id == "superAdmin" || role.id == "admin")} key={role.id} value={role.id}>{role.name}</SelectItem>
+                            return <SelectItem disabled={!checkUserHasHigherPerms(user.role!, role.id)} key={role.id} value={role.id}>{role.name}</SelectItem>
                         })}
                     </SelectContent>
                 </Select>
@@ -122,13 +129,12 @@ export function getUserColumns({impersonateUserAuth, impersonateAdminAuth, banUs
                     <DropdownMenuContent align="end">
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <Link href={`/dashboard/admin/users/${row.original.id}`}>
-                                <DropdownMenuItem><Eye/> View user</DropdownMenuItem>
+                            <Link href={checkUserHasHigherPerms(user.role!, row.original.role!) ? `/dashboard/admin/users/${row.original.id}` : "#"} className={`${checkUserHasHigherPerms(user.role!, row.original.role!) ? "" : "cursor-default"}`} title={checkUserHasHigherPerms(user.role!, row.original.role!) ? "" : "No permission to view user"}>
+                                <DropdownMenuItem  disabled={!checkUserHasHigherPerms(user.role!, row.original.role!)}><Eye/> View user</DropdownMenuItem>
                             </Link>
-                            {impersonateUserAuth && <DropdownMenuItem disabled={targetUserHigherOrSimilarPerms || row.original.role == "admin" && !impersonateAdminAuth || user.id == row.original.id}><UserIcon/> Impersonate</DropdownMenuItem>}
                             <DropdownMenuSeparator/>
-                            <DropdownMenuItem variant="destructive" disabled={targetUserHigherOrSimilarPerms || !banUserAuth || user.id == row.original.id} onClick={()=> setOpenBan(true)}><Ban/> Ban</DropdownMenuItem>
-                            <DropdownMenuItem variant="destructive" disabled={targetUserHigherOrSimilarPerms || !deleteUserAuth || user.id == row.original.id} onClick={()=> setOpenDelete(true)}><Trash/>Delete</DropdownMenuItem>
+                            <DropdownMenuItem variant="destructive" disabled={!checkUserHasHigherPerms(user.role!, row.original.role!) || !banUserAuth || user.id == row.original.id} onClick={()=> setOpenBan(true)}><Ban/> Ban</DropdownMenuItem>
+                            <DropdownMenuItem variant="destructive" disabled={!checkUserHasHigherPerms(user.role!, row.original.role!) || !deleteUserAuth || user.id == row.original.id} onClick={()=> setOpenDelete(true)}><Trash/>Delete</DropdownMenuItem>
                         </DropdownMenuGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>

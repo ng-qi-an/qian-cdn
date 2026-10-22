@@ -1,8 +1,8 @@
 import 'server-only'
 import { headers } from "next/headers";
-import { auth } from "./auth";
-import { User } from "./schema/schemaTypes";
-import { CustomHttpError, InsufficientPermissionsError, UnauthorisedError } from "./errors";
+import { auth } from "../auth";
+import { User } from "../schema/schemaTypes";
+import { CustomHttpError, InsufficientPermissionsError, UnauthorisedError } from "../errors";
 import { NextRequest } from "next/server";
 import { unstable_rethrow } from "next/navigation";
 import { ApiKey } from '@better-auth/api-key';

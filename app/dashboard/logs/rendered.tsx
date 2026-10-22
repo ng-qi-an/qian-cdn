@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { userHasPermissionServer } from "@/lib/permissionHelpers"
+import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers"
 import { RenderedLogsPageClient } from "./client"
 
 export default async function RenderedLogsPage() {

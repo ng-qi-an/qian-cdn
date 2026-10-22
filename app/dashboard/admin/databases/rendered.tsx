@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { db } from "@/lib/db";
-import { userHasPermissionServer } from "@/lib/permissionHelpers";
+import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers";
 import { Database } from "lucide-react";
 import Link from "next/link";
 import DatabaseItem from "./DatabaseItem";

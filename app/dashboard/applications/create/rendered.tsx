@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { userHasPermissionServer } from "@/lib/permissionHelpers";
+import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers";
 import { applications, databases } from "@/lib/schema/schema";
 import { eq, or } from "drizzle-orm";
 import { CreateApplicationsForm } from "./form";

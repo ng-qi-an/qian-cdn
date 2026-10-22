@@ -3,7 +3,7 @@ import DashboardBody from "@/components/navigation/DashboardBody";
 import DashboardHeader from "@/components/navigation/DashboardHeader";
 import DashboardSectionHeader from "@/components/navigation/DashboardSectionHeader";
 import { db } from "@/lib/db";
-import { userHasPermissionServer } from "@/lib/permissionHelpers";
+import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers";
 import { redirect } from "next/navigation";
 import AppSwitcher from "./AppSwitcher";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

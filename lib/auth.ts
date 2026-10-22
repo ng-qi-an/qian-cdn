@@ -3,7 +3,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { db } from "./db";
 import { admin } from "better-auth/plugins"
 import * as schema from "./schema/auth-schema";
-import { ac, adminRole, superAdminRole, userRole, viewOnlyRole } from "./permissions";
+import { ac, adminRole, superAdminRole, userRole, viewOnlyRole } from "./permissions/permissions";
 import { apiKey } from "@better-auth/api-key";
 
 export const auth = betterAuth({
@@ -18,6 +18,65 @@ export const auth = betterAuth({
     user: {
         additionalFields: {
 
+        }
+    },
+    session: {
+        additionalFields: {
+            countryCode: {
+                type: "string",
+                required: false,
+                input: false,
+            },
+            countryName: {
+                type: "string",
+                required: false,
+                input: false,
+            },
+            cityName: {
+                type: "string",
+                required: false,
+                input: false,
+            },
+            latitude: {
+                type: "number",
+                required: false,
+                input: false,
+            },
+            longitude: {
+                type: "number",
+                required: false,
+                input: false,
+            },
+        }
+    },
+    databaseHooks: {
+        session: {
+            create: {
+                before: async(session, ctx) => {
+                    console.log("Session created, fetching location data for IP:", session.ipAddress)
+                    try {
+                        const response = await fetch(`https://ip.hackclub.com/ip/${session.ipAddress}`)
+                        if (response.ok){
+                            const data = await response.json()
+                            return {
+                                data: {
+                                    ...session,
+                                    countryCode: data.country_iso_code,
+                                    countryName: data.country_name,
+                                    cityName: data.city_name,
+                                    latitude: data.latitude,
+                                    longitude: data.longitude,
+                                },
+                            }
+                        } else {
+                            console.log("Error fetching location data when making sesssion:", response.statusText)
+                        }
+                    } catch (error) {
+                        console.log("Error fetching location data when making sesssion:", error)
+                    }
+                    return { data: session }
+                }
+            }
         }
     },
     plugins: [

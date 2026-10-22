@@ -2,7 +2,7 @@ import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
-import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissionHelpers";
+import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissions/serverPermissionHelpers";
 import { apikey } from "@/lib/schema/auth-schema";
 import { applications } from "@/lib/schema/schema";
 import { and, eq } from "drizzle-orm";

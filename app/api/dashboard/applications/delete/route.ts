@@ -1,7 +1,7 @@
 import { deleteFiles } from "@/lib/actions/files/deleteFiles";
 import { db } from "@/lib/db";
 import { NotFoundError } from "@/lib/errors";
-import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissionHelpers";
+import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissions/serverPermissionHelpers";
 import { applications } from "@/lib/schema/schema";
 import { eq } from "drizzle-orm";
 

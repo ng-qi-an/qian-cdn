@@ -6,10 +6,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import UserTabs from "./UserTabs";
-import { Button } from "@/components/ui/button";
-import { Ban, Key, Pen, Trash, User } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-
+import { checkUserHasHigherPerms } from "@/lib/permissions/permissionHelpers";
+import UserActions from "./UserActions";
+import { user as userSchema } from "@/lib/schema/auth-schema";
+import { Badge } from "@/components/ui/badge";
 export const instant = false;
 
 export default async function UserLayout({children, params}: {children: React.ReactNode, params: Promise<{id: string}>}){
@@ -25,6 +25,12 @@ export default async function UserLayout({children, params}: {children: React.Re
     }
     const nameParts = data.name.split(" ")
     const initials = (nameParts[0].charAt(0) + (nameParts[1] ? nameParts[1].charAt(0) : "")).toUpperCase()
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!checkUserHasHigherPerms(session?.user?.role!, data.role!)) {
+        return redirect("/dashboard/admin/users");
+    }
     return <Dashboard>
         <DashboardHeader breadcrumbs={[{name: "Users", href: "/dashboard/admin/users"}, {name: data.name}]}/>
         <DashboardBody className="flex lg:flex-row">
@@ -33,18 +39,11 @@ export default async function UserLayout({children, params}: {children: React.Re
                     <AvatarImage src={data.image || undefined} alt={data.name} />
                     <AvatarFallback className="rounded-none  text-4xl">{initials}</AvatarFallback>
                 </Avatar>
-                <h2 className="mt-4 text-xl font-medium">{data.name}</h2>
+                <h2 className="mt-4 text-xl font-medium flex items-center">{data.name} {data.banned && <Badge variant="destructive" className="ml-2 bg-destructive/10 px-1">Banned</Badge>}</h2>
                 <p className="text-muted-foreground">{data.email}</p>
-                <div className="space-y-2 mt-4">
-                    <Button className="w-full" size="sm" variant="outline"><Pen/> Edit details</Button>
-                    <Button className="w-full" size="sm" variant="outline"><Key/> Change password</Button>
-                    <Button className="w-full" size="sm" variant="outline"><User/> Impersonate</Button>
-                    <Separator className="my-2"/>
-                    <Button className="w-full" size="sm" variant="destructive"><Ban/> Ban</Button>
-                    <Button className="w-full" size="sm" variant="destructive"><Trash/> Delete</Button>
-                </div>
+                <UserActions user={data as typeof userSchema.$inferSelect} currentUser={session?.user!} />
             </div>
-            <div className="lg:ml-6 mt-4 lg:mt-0 w-full">
+            <div className="lg:ml-6 mt-4 lg:mt-0 w-full flex flex-col">
                 <UserTabs userId={id}/>
                 {children}
             </div>

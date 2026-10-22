@@ -25,7 +25,7 @@ export default function SignInPage() {
       })
       if (error) {
         toast.add({
-          title: "Error signing up",
+          title: "Error signing in",
           description: error.message || "An unknown error occurred.",
           type: "error",
         })
@@ -36,7 +36,7 @@ export default function SignInPage() {
     } catch (error) {
       console.log(error)
       toast.add({
-        title: "Error signing up",
+        title: "Error signing in",
         description: error instanceof Error ? error.message : "An unknown error occurred.",
         type: "error",
       })

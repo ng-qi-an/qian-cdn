@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, UnauthorisedError } from "@/lib/errors";
-import { errorToResponse, userHasPermissionServer, verifyAPIKeyOrUser } from "@/lib/permissionHelpers";
+import { errorToResponse, userHasPermissionServer, verifyAPIKeyOrUser } from "@/lib/permissions/serverPermissionHelpers";
 import { HCDNClient } from "@/lib/providers/hcdn/client";
 import { HCDNAuthenticationError } from "@/lib/providers/hcdn/errors";
 import { files as filesDb } from "@/lib/schema/schema";

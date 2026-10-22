@@ -24,7 +24,12 @@ export const session = pgTable("session", {
  ipAddress: text('ip_address'),
  userAgent: text('user_agent'),
  userId: text('user_id').notNull().references(()=> user.id, { onDelete: 'cascade' }),
- impersonatedBy: text('impersonated_by')
+ impersonatedBy: text('impersonated_by'),
+ countryCode: text('country_code'),
+ countryName: text('country_name'),
+ cityName: text('city_name'),
+ latitude: integer('latitude'),
+ longitude: integer('longitude')
 					}, (table) => [
   index("session_userId_idx").on(table.userId),
 ]);

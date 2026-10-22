@@ -2,7 +2,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { InsufficientPermissionsError, UnauthorisedError } from "@/lib/errors";
-import { userHasPermissionServer } from "@/lib/permissionHelpers";
+import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers";
 import { applications } from "@/lib/schema/schema";
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";

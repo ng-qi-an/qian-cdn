@@ -1,6 +1,6 @@
 import { adminClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
-import { ac, adminRole, superAdminRole, userRole, viewOnlyRole } from "./permissions";
+import { ac, adminRole, superAdminRole, userRole, viewOnlyRole } from "./permissions/permissions";
 import { apiKeyClient } from "@better-auth/api-key/client";
 import { Role } from "better-auth/plugins";
 
