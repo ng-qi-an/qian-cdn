@@ -1,6 +1,6 @@
 import { integer, timestamp, jsonb, numeric, pgTable, text } from "drizzle-orm/pg-core";
 import { apikey, user } from "./auth-schema";
-import type { AppLogCode } from "../actions/logs/codes";
+import type { AppLogCode, DbLogCode } from "../actions/logs/codes";
 
 export const databases = pgTable("databases", {
     id: text("id").primaryKey(),
@@ -47,6 +47,16 @@ export const appLogs = pgTable("app_logs", {
     fromUserId: text("from_user_id").references(() => user.id, { onDelete: "no action" }),
     fromApiKeyId: text("from_api_key_id").references(() => apikey.id, { onDelete: "no action" }),
     code: text("type").$type<AppLogCode>().notNull(),
+    data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+export const dbLogs = pgTable("dbLogs", {
+    id: text("id").primaryKey(),
+    databaseId: text("database_id").notNull().references(() => databases.id, { onDelete: "cascade" }),
+    fromUserId: text("from_user_id").references(() => user.id, { onDelete: "no action" }),
+    fromAppId: text("from_app_id").references(() => applications.id, { onDelete: "no action" }),
+    code: text("type").$type<DbLogCode>().notNull(),
     data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })

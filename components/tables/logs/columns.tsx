@@ -1,21 +1,22 @@
 "use client"
 
-import { createColumnHelper } from "@tanstack/react-table"
+import { ColumnHelper, createColumnHelper } from "@tanstack/react-table"
 
 import { type DataTableFeatures } from "../features"
-import { AppLog } from "@/lib/schema/schemaTypes"
+import { Application, AppLog, DbLog } from "@/lib/schema/schemaTypes"
 import SortedColumnHeader from "../SortedColumnHeader"
 import { User } from "better-auth"
 import { ApiKey } from "@better-auth/api-key"
 import AppLogAction from "./AppLogAction"
 import Link from "next/link"
-import { Key, UserRound } from "lucide-react"
+import { AppWindowMac, Key, UserRound } from "lucide-react"
 import { availableServices } from "@/lib/services"
+import DbLogAction from "./DbLogAction"
 
 
 // Use `accessor` for data columns and `display` for columns without one.
 
-export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type: "app", showUserLink: boolean, showAppOriginColumn?: boolean})=>{
+export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type: "app" | "db", showUserLink: boolean, showAppOriginColumn?: boolean})=>{
     let columnHelper;
     let extraColumns: any[] = []
     if (type === "app") {
@@ -51,10 +52,45 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                 }
             }))
         }
+    } else if (type == "db") {
+        columnHelper = createColumnHelper<DataTableFeatures, DbLog & {fromUser: User, fromApp: Application}>()
+        extraColumns = [
+            columnHelper.accessor("code", {
+                header: ({table})=> <p className="flex items-center gap-1">Action</p>,
+                cell: ({row}) => {
+                    const log = row.original
+                    return <DbLogAction log={log}/>
+                }
+            }),
+            columnHelper.display({
+                id: "subject",
+                header: ({table})=> <p className="flex items-center gap-1">Action by</p>,
+                cell: ({row})=>{
+                    const log = row.original
+                    if (log.fromUserId) {
+                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
+                    } else {
+                        return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View application details"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp.name}</p></Link>
+                    }
+                }
+            }),
+            columnHelper.display({
+                id: "application",
+                header: ({table})=> <p className="flex items-center gap-1">Application</p>,
+                cell: ({row})=>{
+                    const log = row.original
+                    if (log.fromAppId) {
+                        return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp.name}</p></Link>
+                    } else {
+                        return <p className="text-muted-foreground">N/A</p>
+                    }
+                }
+            }),
+        ]
     } else {
         throw new Error("Choose a correct type")
     }
-    const columns = [...extraColumns, columnHelper.accessor("createdAt", {
+    const columns = [...extraColumns, (columnHelper as ColumnHelper<DataTableFeatures, any>).accessor("createdAt", {
             header: ({column}) => <SortedColumnHeader column={column}>Created at</SortedColumnHeader>,
             cell: ({row}) => {
                 const createdAt = new Date(row.original.createdAt)
@@ -62,5 +98,5 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
             }
         }),
     ]
-    return columnHelper.columns(columns)
+    return (columnHelper as ColumnHelper<DataTableFeatures, any>).columns(columns)
 }

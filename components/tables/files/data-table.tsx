@@ -26,13 +26,17 @@ import { Search, Upload } from "lucide-react"
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
-  appId: string
+  appId?: string
+  databaseId?: string
+  disableFileUploads?: boolean
 }
 
 export function FilesDataTable<TData extends RowData>({
   columns,
   data,
-  appId
+  appId,
+  databaseId,
+  disableFileUploads
 }: DataTableProps<TData>) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -73,6 +77,13 @@ export function FilesDataTable<TData extends RowData>({
           e.preventDefault();
         }}>
           <input ref={uploadInputRef} name="files" type="file" multiple required onChange={(e)=>{
+            if (!appId){
+              return toast.add({
+                title: "Error uploading files",
+                description: "No application ID provided. This is a code error.",
+                type: "destructive"
+              })
+            }
             const formData = new FormData(uploadFormRef.current!);
             console.log("Uploading files:", formData.getAll("files"));
             formData.append("appId", appId);
@@ -107,7 +118,7 @@ export function FilesDataTable<TData extends RowData>({
             })
           }}/>
         </form>
-        <Button size="sm" onClick={()=>[
+        <Button disabled={disableFileUploads} size="sm" onClick={()=>[
           uploadInputRef.current?.click(),
         ]}>
           <Upload/>
@@ -188,7 +199,7 @@ export function FilesDataTable<TData extends RowData>({
           </Button>
         </div>
       </div>
-      <DeleteFilesDialog appId={appId} fileIds={table.getFilteredSelectedRowModel().rows.map(r => (r.original as Files).id)} open={openDeleteFiles} onOpenChange={setOpenDeleteFiles}/>
+      <DeleteFilesDialog appId={appId} databaseId={databaseId} fileIds={table.getFilteredSelectedRowModel().rows.map(r => (r.original as Files).id)} open={openDeleteFiles} onOpenChange={setOpenDeleteFiles}/>
       {table.getFilteredSelectedRowModel().rows.length > 0 && <div className="absolute bottom-0 bg-secondary border p-2 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 overflow-hidden">
         <p className="text-sm mr-2">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}

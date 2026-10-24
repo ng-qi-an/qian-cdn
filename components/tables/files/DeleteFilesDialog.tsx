@@ -4,7 +4,7 @@ import { toast } from "@/components/ui/toast";
 import revalidateData from "@/lib/revalidateData";
 import { useState } from "react";
 
-export default function DeleteFilesDialog({fileIds, appId, open, onOpenChange}: {fileIds: string[], appId: string, open: boolean, onOpenChange: (open: boolean) => void}) {
+export default function DeleteFilesDialog({fileIds, appId, databaseId, open, onOpenChange}: {fileIds: string[], appId?: string, databaseId?: string, open: boolean, onOpenChange: (open: boolean) => void}) {
     const [submitting, setSubmitting] = useState(false);
     return <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
@@ -24,7 +24,7 @@ export default function DeleteFilesDialog({fileIds, appId, open, onOpenChange}: 
                             headers: {
                                 "Content-Type": "application/json"
                             },
-                            body: JSON.stringify({files: fileIds, appId: appId})
+                            body: JSON.stringify({files: fileIds, appId: appId, databaseId: databaseId})
                         })
                         if (!response.ok){
                             console.error("Error deleting files:", response);

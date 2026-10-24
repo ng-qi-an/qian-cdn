@@ -1,4 +1,5 @@
 import { makeAppLog } from "@/lib/actions/logs/appLog";
+import { makeDbLog } from "@/lib/actions/logs/dbLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError, UnauthorisedError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyAPIKeyOrUser } from "@/lib/permissions/serverPermissionHelpers";
@@ -24,7 +25,8 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id
             return errorToResponse(new UnauthorisedError());
         } else if (user){
             const viewAllPerms = await userHasPermissionServer({applications: ['viewAll']}, user);
-            if (!viewAllPerms.isAuthorised && user.id != file.applications?.ownerId){
+            const viewAllDbPerms = await userHasPermissionServer({databases: ['viewAll']}, user);
+            if (!(viewAllPerms.isAuthorised || viewAllDbPerms.isAuthorised) && user.id != file.applications?.ownerId){
                 return errorToResponse(new UnauthorisedError());
             }
         }
@@ -59,6 +61,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id
         }
         await db.delete(files).where(eq(files.id, id));
         await makeAppLog({appId: file.applicationId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, apiKeyId: apiKey?.id});
+        await makeDbLog({dbId: file.databaseId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, appId: file.applicationId});
         return Response.json({ message: "File deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Error deleting file:", error);

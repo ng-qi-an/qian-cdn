@@ -23,7 +23,7 @@ import { appLogCodes } from "@/lib/actions/logs/codes"
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
-  type: "app"
+  type: "app" | "db"
 }
 
 type LogWithApplication = {
@@ -71,7 +71,7 @@ export function LogsDataTable<TData extends RowData>({
       apps.push({ label: String(app.name), value })
     }
   })
-  const applicationColumn = table.getColumn("applicationId")
+  const applicationColumn = table.getColumn(type === "app" ? "applicationId" : "application")
   const codeColumn = table.getColumn("code")
   const selectedApplicationId = applicationColumn?.getFilterValue() as string | undefined
   const selectedApplication = apps.find((app) => app.value === selectedApplicationId) ?? null
