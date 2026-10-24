@@ -150,7 +150,7 @@ export function CreateDatabasesForm({fetchedDatabases, createPerms}: {fetchedDat
                     <Card className="w-full h-max xl:h-full xl:overflow-auto">
                         <CardHeader>
                             <CardTitle>Service</CardTitle>
-                            <CardDescription>Connect your database to a Content Delivery Network (CDN)</CardDescription>
+                            <CardDescription>Connect your database to a file storage service</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <FieldGroup>
