@@ -1,15 +1,15 @@
 import { FileIcon, FileText, ImageIcon } from "lucide-react";
 
-export const allowedFileTypes = {
+export const fileCategories = {
   images: ["image/bmp", "image/jpeg", "image/png", "image/webp"],
   text: ["text/html", "text/plain"],
   documents: ["application/pdf", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
 }
 
-export const allowedFileTypesList = Object.values(allowedFileTypes).flat();
+export const fileCategoriesList = Object.values(fileCategories).flat();
 
 export function mimeToReadable(mime: string) {
-  if (!allowedFileTypesList.includes(mime)) return "Unknown";
+  if (!fileCategoriesList.includes(mime)) return "Unknown";
   if (mime === "application/pdf") return "PDF Document";
   if (mime === "text/plain" || mime === "application/msword" || mime === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") return "Text Document";
   if (mime === "application/vnd.openxmlformats-officedocument.presentationml.presentation" || mime === "application/vnd.ms-powerpoint") return "Presentation";
@@ -20,7 +20,7 @@ export function mimeToReadable(mime: string) {
 }
 
 export function mimeToIcon(mime: string) {
-    if (allowedFileTypes.images.includes(mime)) return ImageIcon;
-    if (allowedFileTypes.text.includes(mime) || allowedFileTypes.documents.includes(mime)) return FileText;
+    if (fileCategories.images.includes(mime)) return ImageIcon;
+    if (fileCategories.text.includes(mime) || fileCategories.documents.includes(mime)) return FileText;
     return FileIcon;
   }

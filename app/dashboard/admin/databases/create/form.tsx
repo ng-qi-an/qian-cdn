@@ -100,7 +100,7 @@ export function CreateDatabasesForm({fetchedDatabases, createPerms}: {fetchedDat
                         <FieldGroup>
                             <Field>
                                 <FieldLabel>Name</FieldLabel>
-                                <Input type="text" value={name} onChange={(e)=> setName(e.target.value)} required/>
+                                <Input type="text" value={name} onChange={(e)=> setName(e.target.value)} required placeholder="John Doe's R2"/>
                                 {fetchedDatabases.find((x)=> x.name == name.trim()) ? <FieldError>A database with this name already exists.</FieldError>: <FieldDescription>The name of your database. Must be unique.</FieldDescription>}
                             </Field>
                             <Field>

@@ -28,7 +28,7 @@ export default function DangerZoneCard({dbId}: {dbId: string}){
                         console.log("Error deleting database:", response);
                         return toast.add({
                             title: "Error deleting database",
-                            description: responseData.message || "An error occurred while deleting the application. Please try again.",
+                            description: responseData.message || "An error occurred while deleting the database. Please try again.",
                             type: "error"
                         })
                     }
