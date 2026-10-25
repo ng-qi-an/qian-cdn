@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function DangerZoneCard({appId}: {appId: string}){
+export default function DangerZoneCard({dbId}: {dbId: string}){
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [deleteInterval, setDeleteInterval] = useState<NodeJS.Timeout | null>(null);
     const [deleteCountdown, setDeleteCountdown] = useState(3);
@@ -16,33 +16,33 @@ export default function DangerZoneCard({appId}: {appId: string}){
             if (deleteCountdown <= 0){
                 clearInterval(deleteInterval!);
                 try {
-                    const response = await fetch(`/api/dashboard/applications/delete`, {
+                    const response = await fetch(`/api/dashboard/databases/delete`, {
                         method: "DELETE",
                         headers: {
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({appId})
+                        body: JSON.stringify({dbId})
                     });
                     const responseData = await response.json();
                     if (!response.ok){
-                        console.log("Error deleting application:", response);
+                        console.log("Error deleting database:", response);
                         return toast.add({
-                            title: "Error deleting application",
+                            title: "Error deleting database",
                             description: responseData.message || "An error occurred while deleting the application. Please try again.",
                             type: "error"
                         })
                     }
                     toast.add({
-                        title: "Application deleted",
-                        description: "The application has been deleted successfully.",
+                        title: "Database deleted",
+                        description: "The database has been deleted successfully.",
                         type: "success"
                     })
-                    router.push('/dashboard/applications');
+                    router.push('/dashboard/admin/databases');
                 } catch (error) {
-                    console.log("Error deleting application:", error);
+                    console.log("Error deleting database:", error);
                     return toast.add({
-                        title: "Error deleting application",
-                        description: "An error occurred while deleting the application. Please try again.",
+                        title: "Error deleting database",
+                        description: "An error occurred while deleting the database. Please try again.",
                         type: "error"
                     })
                 }
@@ -59,8 +59,8 @@ export default function DangerZoneCard({appId}: {appId: string}){
                 <FieldGroup>
                     <Field orientation="horizontal">
                         <div className="w-full">
-                            <FieldLabel>Delete application</FieldLabel>
-                            <FieldDescription>This action will permanently delete this application and all of its data.</FieldDescription>
+                            <FieldLabel>Delete database</FieldLabel>
+                            <FieldDescription>This action will permanently delete this database and all of its data.</FieldDescription>
                         </div>
                         <Button type="button" variant="destructive" className="ml-2" size="sm" onClick={() => setShowDeleteDialog(true)}>Delete</Button>
                     </Field>
@@ -70,8 +70,8 @@ export default function DangerZoneCard({appId}: {appId: string}){
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this application?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-wrap">All data including files, API keys & logs will be deleted <b>permanently</b>. Ensure you migrate your applications before continuing.</AlertDialogDescription>
+                    <AlertDialogTitle>Delete this database?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-wrap">All data including all applications and files will be deleted <b>permanently</b>, even from your file storage. <br/>Ensure all users have migrated off this database before continuing.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogAction disabled={deleteCountdown <= 0} variant={deleteInterval ? "destructive" : 'outline'} className={!deleteInterval ? `border-destructive` : ""} onMouseDown={()=>{

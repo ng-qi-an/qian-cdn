@@ -1,21 +1,25 @@
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import ProviderSelector from "../../create/ProviderSelector";
 
 
 export default function ServiceSettingsCard({provider, keys, setKeys}: {provider: string, keys: Record<string, string>, setKeys: (keys: Record<string, string>) => void}){
-    const [accessUrl, setAccessUrl] = useState(keys.accessUrl || "");
-    const [accessKeyId, setAccessKeyId] = useState(keys.accessKeyId || "");
-    const [secretAccessKey, setSecretAccessKey] = useState(keys.secretAccessKey || "");
-    const [bucketName, setBucketName] = useState(keys.bucketName || "");
-    const [apiKey, setApiKey] = useState(keys.apiKey || "");
+    const [accessUrl, setAccessUrl] = useState(keys.accessUrl);
+    const [accessKeyId, setAccessKeyId] = useState(keys.accessKeyId);
+    const [secretAccessKey, setSecretAccessKey] = useState(keys.secretAccessKey);
+    const [bucketName, setBucketName] = useState(keys.bucketName);
+    const [apiKey, setApiKey] = useState(keys.apiKey);
     
-    const s3BucketNameRegex = /^(?!\d{1,3}(?:\.\d{1,3}){3}$)(?!.*\.\.)(?!.*\.-)(?!.*-\. )[a-z0-9](?:[a-z0-9.-]{1,61}[a-z0-9])$/
-    const isS3BucketNameValid = s3BucketNameRegex.test(bucketName) && bucketName.length >= 3 && bucketName.length <= 63;
+    useEffect(()=>{
+        setKeys({accessUrl, accessKeyId, secretAccessKey, bucketName, apiKey})
+    }, [accessUrl, accessKeyId, secretAccessKey, bucketName, apiKey])
 
+    const s3BucketNameRegex = /^(?!\d{1,3}(?:\.\d{1,3}){3}$)(?!.*\.\.)(?!.*\.-)(?!.*-\. )[a-z0-9](?:[a-z0-9.-]{1,61}[a-z0-9])$/
+    const isS3BucketNameValid = bucketName && s3BucketNameRegex.test(bucketName) && bucketName.length >= 3 && bucketName.length <= 63;
     return <Card className="w-full shrink-0">
         <CardHeader>
             <CardTitle>Service</CardTitle>

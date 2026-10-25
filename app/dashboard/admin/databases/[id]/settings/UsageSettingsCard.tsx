@@ -29,7 +29,7 @@ export default function UsageSettingsCard({limit, setLimit, limitUnit, setLimitU
                             </SelectContent>
                         </Select>
                     </div>
-                    <FieldDescription>{Number(limit) == 0 ? "The application will not have a size limit." : `The application will stop accepting files when it exceeds ${limit} ${limitUnit.toUpperCase()}.`}</FieldDescription>
+                    <FieldDescription>{Number(limit) == 0 ? "The database will not have a size limit." : `The database will stop accepting files when it exceeds ${limit} ${limitUnit.toUpperCase()}.`}</FieldDescription>
                 </Field>
                 <Field>
                     <FieldLabel>Limit alert</FieldLabel>

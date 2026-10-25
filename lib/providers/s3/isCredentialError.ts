@@ -13,7 +13,7 @@ const CREDENTIAL_ERROR_NAMES = [
 
 export function isCredentialError(err: unknown): boolean {
   // 1. Client-side: credentials could not be resolved at all.
-  if (err instanceof Error && err.name === "CredentialsProviderError") return true;
+  if (err instanceof Error && (err.name === "CredentialsProviderError" || err.message.includes("ENOTFOUND"))) return true;
 
   const e = err as S3ServiceException;
   if (!e?.$metadata) return false; // not an SDK service error

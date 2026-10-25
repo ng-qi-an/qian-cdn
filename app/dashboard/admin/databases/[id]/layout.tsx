@@ -13,7 +13,7 @@ import { availableServices } from "@/lib/services";
 
 export const instant = false;
 
-export default async function ApplicationPage({params, children}: {params: Promise<{id: string}>, children: React.ReactNode}){
+export default async function DatabasePage({params, children}: {params: Promise<{id: string}>, children: React.ReactNode}){
     const { id } = await params;
     const viewAllPerms = await userHasPermissionServer({databases: ["viewAll"]});
     const dbData = await db.query.databases.findFirst({
@@ -24,7 +24,7 @@ export default async function ApplicationPage({params, children}: {params: Promi
         with: {
         }
     })
-    if (!dbData) return redirect("/dashboard/applications");
+    if (!dbData) return redirect("/dashboard/admin/databases");
     
     const otherDbs = await db.query.databases.findMany({
         where: {
