@@ -1,3 +1,4 @@
+import updateRequestsAnalyticsEvent from "@/lib/actions/analytics/updateRequestsAnalyticsEvent";
 import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { makeDbLog } from "@/lib/actions/logs/dbLog";
 import { db } from "@/lib/db";
@@ -9,6 +10,9 @@ import { files } from "@/lib/schema/schema";
 import { eq } from "drizzle-orm";
 
 export const PATCH = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id: string }> }, apiKey, user) => {
+    if (!process.env.NEXT_PUBLIC_TIMEZONE){
+        return errorToResponse(new InvalidConfigurationError("The NEXT_PUBLIC_TIMEZONE environment variable is not set."));
+    }
     try {
         const data = await req.json();
         const { id } = await ctx.params;
@@ -43,6 +47,7 @@ export const PATCH = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id:
         await db.update(files).set({name: data.name}).where(eq(files.id, id));
         await makeAppLog({appId: file.applicationId, code: "FILE_EDITED", data: {oldName: file.name, newName: data.name}, userId: user?.id, apiKeyId: apiKey?.id});
         await makeDbLog({dbId: file.databaseId, code: "FILE_EDITED", data: {oldName: file.name, newName: data.name}, userId: user?.id, appId: file.applicationId});
+        await updateRequestsAnalyticsEvent({increment: 1, appId: file.applicationId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
         return Response.json({ message: "File renamed successfully", newName: data.name }, { status: 200 });
     } catch (error) {
         console.error("Error renaming file:", error);

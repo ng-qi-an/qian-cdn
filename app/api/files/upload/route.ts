@@ -12,7 +12,9 @@ import { isCredentialError } from "@/lib/providers/s3/isCredentialError";
 import { Application } from "@/lib/schema/schemaTypes";
 import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { makeDbLog } from "@/lib/actions/logs/dbLog";
-import updateFileAnalyticsEvent from "@/lib/actions/analytics/updateFileAnalyticsEvent";
+import updateSizeAnalyticsEvent from "@/lib/actions/analytics/updateSizeAnalyticsEvent";
+import updateFilesAnalyticsEvent from "@/lib/actions/analytics/updateFilesAnalyticsEvent";
+import updateRequestsAnalyticsEvent from "@/lib/actions/analytics/updateRequestsAnalyticsEvent";
 
 const maxFileSize = convertUnit(0.5, "gb", "b"); // 0.5 GB in bytes
 const maxFiles = 20; // Maximum number of files allowed
@@ -61,7 +63,9 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                     size: upload.size
                 }))
                 await db.insert(filesDb).values(normalisedUploads);
-                await updateFileAnalyticsEvent({increment: normalisedUploads.reduce((acc, file) => acc + file.size, 0), appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+                await updateRequestsAnalyticsEvent({increment: 1, appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+                await updateFilesAnalyticsEvent({increment: normalisedUploads.length, appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+                await updateSizeAnalyticsEvent({increment: normalisedUploads.reduce((acc, file) => acc + file.size, 0), appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
                 await makeAppLog({appId: appData.id, code: "FILE_CREATED", data: {files: normalisedUploads.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, apiKeyId: apiKey?.id});
                 await makeDbLog({dbId: appData.database!.id, code: "FILE_CREATED", data: {files: normalisedUploads.map(f => ({id: f.id, name: f.name, size: f.size}))}, appId: appData.id});
                 return Response.json({uploads: normalisedUploads, failed});
@@ -110,7 +114,9 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                 return errorToResponse(new InvalidConfigurationError("All file uploads failed. Please check your configuration and try again."));
             }
             await db.insert(filesDb).values(successFiles);
-            await updateFileAnalyticsEvent({increment: successFiles.reduce((acc, file) => acc + file.size, 0), appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+            await updateRequestsAnalyticsEvent({increment: 1, appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+            await updateFilesAnalyticsEvent({increment: successFiles.length, appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+            await updateSizeAnalyticsEvent({increment: successFiles.reduce((acc, file) => acc + file.size, 0), appId: appData.id, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
             await makeAppLog({appId: appData.id, code: "FILE_CREATED", data: {files: successFiles.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, apiKeyId: apiKey?.id});
             await makeDbLog({dbId: appData.database!.id, code: "FILE_CREATED", data: {files: successFiles.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, appId: appData.id});
             return Response.json({uploads: successFiles, failed: failedFiles});

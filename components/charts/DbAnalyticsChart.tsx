@@ -71,7 +71,7 @@ export default function DbAnalyticsChart({data, showLimit, limit, alerts, apps, 
                 })
               }}
             />
-            {showLimit && <YAxis 
+            {showLimit && data[0]?.type == "size" && <YAxis 
               domain={[0, limit > 0 && showLimit ? limit : "auto"]}
               tickFormatter={(value) => {
                 const formattedSize = convertFromBytesToSensible(value as number)
@@ -89,10 +89,10 @@ export default function DbAnalyticsChart({data, showLimit, limit, alerts, apps, 
                               <div style={{backgroundColor: `var(--color-${name})`}} className="size-3 mr-2"/>
                               {chartConfig[name as keyof typeof chartConfig]?.label || name}
                               <div className="ml-auto flex items-baseline gap-0.5 font-medium text-foreground">
-                                  {size.value.toFixed(2)}
-                                  <span className="font-normal text-muted-foreground">
+                                  {data[0]?.type == "size" ? size.value.toFixed(2) : size.value}
+                                  {data[0]?.type == "size" && <span className="font-normal text-muted-foreground">
                                       {size.unit.toUpperCase()}
-                                  </span>
+                                  </span>}
                               </div>
                           </div>
                       }}
@@ -110,14 +110,14 @@ export default function DbAnalyticsChart({data, showLimit, limit, alerts, apps, 
               return <Area
                 key={key}
                 dataKey={key}
-                type="natural"
+                type="monotone"
                 fill={`url(#fill${key})`}
                 stroke={`var(--color-${key})`}
                 stackId="a"
               />
             })}
-            {alerts[0] && alerts[0] > 0 && showLimit && <ReferenceLine y={(alerts[0] / 100) * limit} stroke={'var(--primary)'} label={<Label position="insideTopRight" fill="var(--primary)" offset={10}>Limit alert</Label>} strokeDasharray={"3 3"}/>}
-            {limit > 0 && showLimit && <ReferenceLine y={limit} stroke={'var(--destructive)'} label={<Label position="insideTopRight" fill="var(--destructive)" offset={10}>Limit</Label>} strokeDasharray={"4 3"}/>}
+            {data[0]?.type == "size" && alerts[0] && alerts[0] > 0 && showLimit && <ReferenceLine y={(alerts[0] / 100) * limit} stroke={'var(--primary)'} label={<Label position="insideTopRight" fill="var(--primary)" offset={10}>Limit alert</Label>} strokeDasharray={"3 3"}/>}
+            {data[0]?.type == "size" && limit > 0 && showLimit && <ReferenceLine y={limit} stroke={'var(--destructive)'} label={<Label position="insideTopRight" fill="var(--destructive)" offset={10}>Limit</Label>} strokeDasharray={"4 3"}/>}
         </AreaChart>
     </ChartContainer>
 }

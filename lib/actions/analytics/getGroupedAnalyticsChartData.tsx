@@ -66,38 +66,44 @@ export default function getGroupedAnalyticsChartData({data, timezone, startDate,
         const entry: { date: string } & Record<string, any> = { date };
 
         for (const [appId, records] of recordsByApp) {
-        const dateRecords = records.filter(
-            (record) => formatDate(record.startDate, timezone) === date,
-        );
+            const dateRecords = records.filter(
+                (record) => formatDate(record.startDate, timezone) === date,
+            );
 
-        if (dateRecords.length > 0) {
-            // Use the recorded value for dates with events.
-            entry[appId] = Number(dateRecords[dateRecords.length - 1].value);
-            continue;
+            if (dateRecords.length > 0) {
+                // Use the recorded value for dates with events.
+                entry[appId] = Number(dateRecords[dateRecords.length - 1].value);
+                continue;
+            }
+            const isRollingTotal = records[0]?.type === "size" || records[0]?.type === "files";
+            if (isRollingTotal) {
+
+                // Find the next event after this date.
+                const nextRecord = records.find(
+                    (record) => formatDate(record.startDate, timezone) > date,
+                );
+
+                if (nextRecord) {
+                    // Fill the gap using the baseline before the next event.
+                    entry[appId] = Number(nextRecord.prevValue);
+                    continue;
+                }
+
+                // No future event: carry forward the latest recorded value.
+                const previousRecords = records.filter(
+                    (record) => formatDate(record.startDate, timezone) < date,
+                );
+                const previousRecord = previousRecords[previousRecords.length - 1];
+
+                if (previousRecord) {
+                    entry[appId] = Number(previousRecord.value);
+                } else {
+                    entry[appId] = 0;
+                }
+            } else {
+                entry[appId] = 0;
+            }
         }
-
-        // Find the next event after this date.
-        const nextRecord = records.find(
-            (record) => formatDate(record.startDate, timezone) > date,
-        );
-
-        if (nextRecord) {
-            // Fill the gap using the baseline before the next event.
-            entry[appId] = Number(nextRecord.prevValue);
-            continue;
-        }
-
-        // No future event: carry forward the latest recorded value.
-        const previousRecords = records.filter(
-            (record) => formatDate(record.startDate, timezone) < date,
-        );
-        const previousRecord = previousRecords[previousRecords.length - 1];
-
-        if (previousRecord) {
-            entry[appId] = Number(previousRecord.value);
-        }
-        }
-
         return entry;
     });
 }

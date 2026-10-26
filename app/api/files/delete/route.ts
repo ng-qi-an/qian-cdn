@@ -7,7 +7,9 @@ import { and, eq, inArray } from "drizzle-orm";
 import { deleteFiles } from "@/lib/actions/files/deleteFiles";
 import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { makeDbLog } from "@/lib/actions/logs/dbLog";
-import updateFileAnalyticsEvent from "@/lib/actions/analytics/updateFileAnalyticsEvent";
+import updateSizeAnalyticsEvent from "@/lib/actions/analytics/updateSizeAnalyticsEvent";
+import updateFilesAnalyticsEvent from "@/lib/actions/analytics/updateFilesAnalyticsEvent";
+import updateRequestsAnalyticsEvent from "@/lib/actions/analytics/updateRequestsAnalyticsEvent";
 
 
 export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
@@ -72,7 +74,9 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
             const response = await deleteFiles({filesFromDb: filesFromDb, keys: databaseKeys, provider: databaseProvider ?? ""});
             if (appId){
                 await makeAppLog({appId: appId, code: "FILE_DELETED", data: {files: response.deleted}, userId: user?.id, apiKeyId: apiKey?.id});
-                await updateFileAnalyticsEvent({increment: -(filesFromDb.filter((file)=> response.deleted.includes(file.id)).reduce((acc, file) => acc + file.size, 0)), appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+                await updateRequestsAnalyticsEvent({increment: 1, appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+                await updateFilesAnalyticsEvent({increment: response.deleted.length, appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
+                await updateSizeAnalyticsEvent({increment: -(filesFromDb.filter((file)=> response.deleted.includes(file.id)).reduce((acc, file) => acc + file.size, 0)), appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
             } else {
                 const filesSortedByApp: Record<string, {id: string, key: string, size: number, applicationId: string}[]> = {};
                 filesFromDb.filter((file)=> response.deleted.includes(file.id)).map((file)=>{
@@ -80,7 +84,9 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                 })
                 await Promise.all(Object.keys(filesSortedByApp).map(async(appId)=>{
                     await makeAppLog({appId: appId, code: "FILE_DELETED", data: {files: filesSortedByApp[appId].map(file => file.id)}, userId: user?.id});
-                    await updateFileAnalyticsEvent({increment: -filesSortedByApp[appId].reduce((acc, file) => acc + file.size, 0), appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE!});
+                    await updateRequestsAnalyticsEvent({increment: 1, appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE!});
+                    await updateFilesAnalyticsEvent({increment: filesSortedByApp[appId].length, appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE!});
+                    await updateSizeAnalyticsEvent({increment: -filesSortedByApp[appId].reduce((acc, file) => acc + file.size, 0), appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE!});
                 }))
             }
             await makeDbLog({dbId: databaseId, code: "FILE_DELETED", data: {files: response.deleted}, userId: user?.id, appId: appId});
