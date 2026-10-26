@@ -11,6 +11,9 @@ import updateFileAnalyticsEvent from "@/lib/actions/analytics/updateFileAnalytic
 
 
 export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
+    if (!process.env.NEXT_PUBLIC_TIMEZONE){
+        return errorToResponse(new InvalidConfigurationError("The NEXT_PUBLIC_TIMEZONE environment variable is not set."));
+    }
     try {
         const data = await req.json();
         if (!Array.isArray(data.files) || data.files.length === 0) {
@@ -31,12 +34,11 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
         let databaseProvider;
         let filesFromDb: {id: string, key: string, size: number, applicationId: string}[] = [];
         let databaseId: string = "";
-        let appTimezone: string = "";
         let appId: string | undefined = undefined;
         if (data.appId || apiKey){
-            let appData: Pick<Application, "id" | "timezone"> & { database: { provider: string, id: string, keys: any | undefined } | null } | null = null;
+            let appData: Pick<Application, "id"> & { database: { provider: string, id: string, keys: any | undefined } | null } | null = null;
             if (apiKey){
-                appData = await db.query.applications.findFirst({where: {id: apiKey.metadata?.appId}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true, timezone: true}}) ?? null;
+                appData = await db.query.applications.findFirst({where: {id: apiKey.metadata?.appId}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true}}) ?? null;
                 if (!appData) {
                     return errorToResponse(new UnauthorisedError());
                 }
@@ -45,7 +47,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                     return errorToResponse(new InvalidConfigurationError("Missing appId in request body."));
                 }
                 const viewAllPerms = await userHasPermissionServer({applications: ['viewAll']}, user);
-                appData = await db.query.applications.findFirst({where: {id: data.appId as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true, timezone: true}}) ?? null;
+                appData = await db.query.applications.findFirst({where: {id: data.appId as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true}}) ?? null;
             }
             if (!appData) {
                 return errorToResponse(new UnauthorisedError());
@@ -55,7 +57,6 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
             databaseProvider = appData.database?.provider ?? "";
             filesFromDb = await db.select({id: filesDb.id, key: filesDb.key, size: filesDb.size, applicationId: filesDb.applicationId}).from(filesDb).where(and(inArray(filesDb.id, files), eq(filesDb.applicationId, appData.id)))
             databaseId = appData.database?.id ?? "";
-            appTimezone = appData.timezone;
         } else if (data.databaseId && user){
             const viewAllPerms = await userHasPermissionServer({databases: ['viewAll']}, user);
             const databaseData = await db.query.databases.findFirst({where: {id: data.databaseId as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, columns: {provider: true, keys: true}});
@@ -71,7 +72,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
             const response = await deleteFiles({filesFromDb: filesFromDb, keys: databaseKeys, provider: databaseProvider ?? ""});
             if (appId){
                 await makeAppLog({appId: appId, code: "FILE_DELETED", data: {files: response.deleted}, userId: user?.id, apiKeyId: apiKey?.id});
-                await updateFileAnalyticsEvent({increment: -(filesFromDb.filter((file)=> response.deleted.includes(file.id)).reduce((acc, file) => acc + file.size, 0)), appId: appId, timezone: appTimezone});
+                await updateFileAnalyticsEvent({increment: -(filesFromDb.filter((file)=> response.deleted.includes(file.id)).reduce((acc, file) => acc + file.size, 0)), appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
             } else {
                 const filesSortedByApp: Record<string, {id: string, key: string, size: number, applicationId: string}[]> = {};
                 filesFromDb.filter((file)=> response.deleted.includes(file.id)).map((file)=>{
@@ -79,8 +80,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                 })
                 await Promise.all(Object.keys(filesSortedByApp).map(async(appId)=>{
                     await makeAppLog({appId: appId, code: "FILE_DELETED", data: {files: filesSortedByApp[appId].map(file => file.id)}, userId: user?.id});
-                    const appTimezone = (await db.query.applications.findFirst({where: {id: appId}, columns: {timezone: true}}))?.timezone || "";
-                    await updateFileAnalyticsEvent({increment: -filesSortedByApp[appId].reduce((acc, file) => acc + file.size, 0), appId: appId, timezone: appTimezone});
+                    await updateFileAnalyticsEvent({increment: -filesSortedByApp[appId].reduce((acc, file) => acc + file.size, 0), appId: appId, timezone: process.env.NEXT_PUBLIC_TIMEZONE!});
                 }))
             }
             await makeDbLog({dbId: databaseId, code: "FILE_DELETED", data: {files: response.deleted}, userId: user?.id, appId: appId});

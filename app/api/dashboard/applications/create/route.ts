@@ -9,7 +9,7 @@ export const POST = verifyUserWithPermission(async(user)=>{
     console.log("Posted")
     const data = await req.json();
     console.log("Data received:", data);
-    const requiredKeys = ["name", "description", "databaseId", "timezone"]
+    const requiredKeys = ["name", "description", "databaseId"]
     if (requiredKeys.filter(key => !Object.keys(data).includes(key)).length > 0) {
         console.log("Missing required keys. Expected:", requiredKeys, "Got:", Object.keys(data));
         return Response.json({ error: "INVALID_CONFIGURATION", message: "Configuration does not match expectations." }, { status: 400 });
@@ -24,7 +24,6 @@ export const POST = verifyUserWithPermission(async(user)=>{
         limit: data.limit || 0,
         alerts: data.usageAlert ? [data.usageAlert] : [],
         status: createPerms.isAuthorised ? "active" : "requested",
-        timezone: data.timezone
     }
     try {
         await db.insert(applications).values(payload);

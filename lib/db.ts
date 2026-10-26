@@ -6,7 +6,8 @@ import * as authSchema from './schema/auth-schema';
 import { authRelations } from './schema/auth-schema';
 import { relations } from './schema/relations';
 
-const baseRelations = defineRelationsPart({ ...schema, ...authSchema });
+const { authRelations: _, ...authTables } = authSchema;
+const baseRelations = defineRelationsPart({ ...schema, ...authTables });
 
 const finalRelations = {
   ...baseRelations,
@@ -22,4 +23,3 @@ const finalRelations = {
 };
 
 export const db = drizzle(process.env.DATABASE_URL!, { relations: finalRelations });
-

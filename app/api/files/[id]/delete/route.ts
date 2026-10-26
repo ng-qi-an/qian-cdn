@@ -13,12 +13,15 @@ import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { eq } from "drizzle-orm";
 
 export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id: string }> }, apiKey, user) => {
+    if (!process.env.NEXT_PUBLIC_TIMEZONE){
+        return errorToResponse(new InvalidConfigurationError("The NEXT_PUBLIC_TIMEZONE environment variable is not set."));
+    }
     try {
         const { id } = await ctx.params;
         if (!id){
             return errorToResponse(new InvalidConfigurationError());
         }
-        const file = await db.query.files.findFirst({where: {id}, with: {database: {columns: {provider: true, keys: true}}, applications: {columns: {ownerId: true, timezone: true}}}});
+        const file = await db.query.files.findFirst({where: {id}, with: {database: {columns: {provider: true, keys: true}}, applications: {columns: {ownerId: true}}}});
         if (!file){
             return errorToResponse(new NotFoundError("File not found."));
         }
@@ -66,7 +69,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id
         }
         await makeAppLog({appId: file.applicationId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, apiKeyId: apiKey?.id});
         await makeDbLog({dbId: file.databaseId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, appId: file.applicationId});
-        await updateFileAnalyticsEvent({increment: -file.size, appId: file.applicationId, timezone: file.applications?.timezone ?? ""});
+        await updateFileAnalyticsEvent({increment: -file.size, appId: file.applicationId, timezone: process.env.NEXT_PUBLIC_TIMEZONE});
         return Response.json({ message: "File deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Error deleting file:", error);

@@ -52,7 +52,6 @@ export function CreateApplicationsForm({dbCreatePerms, fetchedDatabases, fetched
                 },
                 body: JSON.stringify({
                     name: name.trim(),
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                     description: description.trim() || "No description provided.",
                     databaseId
                 })

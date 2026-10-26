@@ -17,6 +17,15 @@ export default async function RenderedDbOverviewPage({params}: {params: Promise<
                     size: true,
                     contentType: true,
                 }
+            },
+            applications: {
+                columns: {
+                    id: true,
+                    name: true
+                },
+                with: {
+                    appAnalytics: true
+                }
             }
         }
     })

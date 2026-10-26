@@ -25,7 +25,6 @@ export const applications = pgTable("applications", {
     limit: numeric("limit", { mode: 'number' }).notNull(),
     status: text("status").notNull(),
     alerts: jsonb("alerts").$type<any[]>().notNull(),
-    timezone: text("timezone").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
