@@ -21,7 +21,7 @@ export const PATCH = verifyUser(async(req: Request, ctx, user) => {
         name: data.name.trim(),
         description: data.description.trim() || "No description provided.",
         limit: data.limit,
-        alerts: [data.usageAlert],
+        alerts: data.usageAlert ? [data.usageAlert] : [],
         updatedAt: new Date(),
     }
     try {

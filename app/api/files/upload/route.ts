@@ -12,6 +12,7 @@ import { isCredentialError } from "@/lib/providers/s3/isCredentialError";
 import { Application } from "@/lib/schema/schemaTypes";
 import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { makeDbLog } from "@/lib/actions/logs/dbLog";
+import updateFileAnalyticsEvent from "@/lib/actions/analytics/updateFileAnalyticsEvent";
 
 const maxFileSize = convertUnit(0.5, "gb", "b"); // 0.5 GB in bytes
 const maxFiles = 20; // Maximum number of files allowed
@@ -30,15 +31,15 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
         if (files.some(file => file.size > maxFileSize)) {
             return errorToResponse(new InvalidConfigurationError("One or more files exceed the maximum allowed size of 1 GB."));
         }
-        let appData: Pick<Application, "id"> & { database: { provider: string, id: string, keys: any | undefined } | null } | null = null;
+        let appData: Pick<Application, "id" | "timezone"> & { database: { provider: string, id: string, keys: any | undefined } | null } | null = null;
         if (apiKey){
-            appData = await db.query.applications.findFirst({where: {id: apiKey.metadata?.appId}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true}}) ?? null;
+            appData = await db.query.applications.findFirst({where: {id: apiKey.metadata?.appId}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true, timezone: true}}) ?? null;
         } else if (user){
             if (!formData.get("appId")){
                 return errorToResponse(new InvalidConfigurationError("Missing appId in form data."));
             }
             const viewAllPerms = await userHasPermissionServer({applications: ['viewAll']}, user);
-            appData = await db.query.applications.findFirst({where: {id: formData.get("appId") as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true}}) ?? null;
+            appData = await db.query.applications.findFirst({where: {id: formData.get("appId") as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true, timezone: true}}) ?? null;
         }
         if (!appData) {
             return errorToResponse(new UnauthorisedError());
@@ -57,6 +58,7 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                     size: upload.size
                 }))
                 await db.insert(filesDb).values(normalisedUploads);
+                await updateFileAnalyticsEvent({increment: normalisedUploads.reduce((acc, file) => acc + file.size, 0), appId: appData.id, timezone: appData.timezone});
                 await makeAppLog({appId: appData.id, code: "FILE_CREATED", data: {files: normalisedUploads.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, apiKeyId: apiKey?.id});
                 await makeDbLog({dbId: appData.database!.id, code: "FILE_CREATED", data: {files: normalisedUploads.map(f => ({id: f.id, name: f.name, size: f.size}))}, appId: appData.id});
                 return Response.json({uploads: normalisedUploads, failed});
@@ -105,6 +107,7 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
                 return errorToResponse(new InvalidConfigurationError("All file uploads failed. Please check your configuration and try again."));
             }
             await db.insert(filesDb).values(successFiles);
+            await updateFileAnalyticsEvent({increment: successFiles.reduce((acc, file) => acc + file.size, 0), appId: appData.id, timezone: appData.timezone});
             await makeAppLog({appId: appData.id, code: "FILE_CREATED", data: {files: successFiles.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, apiKeyId: apiKey?.id});
             await makeDbLog({dbId: appData.database!.id, code: "FILE_CREATED", data: {files: successFiles.map(f => ({id: f.id, name: f.name, size: f.size}))}, userId: user?.id, appId: appData.id});
             return Response.json({uploads: successFiles, failed: failedFiles});

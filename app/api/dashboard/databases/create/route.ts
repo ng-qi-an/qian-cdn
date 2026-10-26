@@ -85,7 +85,7 @@ export const POST = verifyUserWithPermission(async(user)=>{
         provider: data.provider,
         keys: data.keys,
         limit: data.limit,
-        alerts: [data.usageAlert],
+        alerts: data.usageAlert ? [data.usageAlert] : [],
         visibility: data.visibility,
     }
     try {

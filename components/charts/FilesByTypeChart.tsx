@@ -30,12 +30,14 @@ export default function FilesByTypeChart({files, showByLimit, limit}: {files: {c
             label: "Other",
             color: "var(--chart-4)",
         },
+        
+        
         ...(showByLimit && limit > 0 ? {
             available: {
                 label: "Available",
                 color: "var(--secondary)",
             }
-        } : {})
+        } : {}),
     } satisfies ChartConfig
     if (limit > 0){
     }
@@ -46,12 +48,12 @@ export default function FilesByTypeChart({files, showByLimit, limit}: {files: {c
         text: [],
         documents: [],
         other: [],
-    ...(showByLimit && limit > 0 ? {
-        available: [{
-            contentType: "available",
-            size: limit - totalFileSize
-        }]
-    } : {})
+        ...(showByLimit && limit > 0 ? {
+            available: [{
+                contentType: "available",
+                size: limit - totalFileSize
+            }]
+        } : {})
     }
     files.map((file)=>{
         if (fileCategories.images.includes(file.contentType)){

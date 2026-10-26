@@ -1,3 +1,4 @@
+import updateFileAnalyticsEvent from "@/lib/actions/analytics/updateFileAnalyticsEvent";
 import { makeAppLog } from "@/lib/actions/logs/appLog";
 import { makeDbLog } from "@/lib/actions/logs/dbLog";
 import { db } from "@/lib/db";
@@ -17,7 +18,7 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id
         if (!id){
             return errorToResponse(new InvalidConfigurationError());
         }
-        const file = await db.query.files.findFirst({where: {id}, with: {database: {columns: {provider: true, keys: true}}, applications: {columns: {ownerId: true}}}});
+        const file = await db.query.files.findFirst({where: {id}, with: {database: {columns: {provider: true, keys: true}}, applications: {columns: {ownerId: true, timezone: true}}}});
         if (!file){
             return errorToResponse(new NotFoundError("File not found."));
         }
@@ -59,9 +60,13 @@ export const DELETE = verifyAPIKeyOrUser(async (req, ctx: { params: Promise<{ id
         } else {
             return errorToResponse(new InvalidConfigurationError("The api key's database provider is not supported for file uploads."));
         }
-        await db.delete(files).where(eq(files.id, id));
+        const response = await db.delete(files).where(eq(files.id, id));
+        if (response.rowCount === 0){
+            return errorToResponse(new NotFoundError("File not found."));
+        }
         await makeAppLog({appId: file.applicationId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, apiKeyId: apiKey?.id});
         await makeDbLog({dbId: file.databaseId, code: "FILE_DELETED", data: {files: [file.id]}, userId: user?.id, appId: file.applicationId});
+        await updateFileAnalyticsEvent({increment: -file.size, appId: file.applicationId, timezone: file.applications?.timezone ?? ""});
         return Response.json({ message: "File deleted successfully" }, { status: 200 });
     } catch (error) {
         console.error("Error deleting file:", error);

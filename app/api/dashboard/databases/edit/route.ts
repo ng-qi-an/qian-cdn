@@ -84,7 +84,7 @@ export const PATCH = verifyUser(async(req: Request, ctx, user) => {
         visibility: data.visibility,
         keys: data.keys,
         limit: data.limit,
-        alerts: [data.usageAlert],
+        alerts: data.usageAlert ? [data.usageAlert] : [],
         updatedAt: new Date(),
     }
     try {

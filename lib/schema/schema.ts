@@ -1,6 +1,7 @@
-import { integer, timestamp, jsonb, numeric, pgTable, text } from "drizzle-orm/pg-core";
+import { integer, timestamp, jsonb, numeric, pgTable, text, date, unique } from "drizzle-orm/pg-core";
 import { apikey, user } from "./auth-schema";
 import type { AppLogCode, DbLogCode } from "../actions/logs/codes";
+import { AnalyticsEventType } from "../actions/analytics/eventTypes";
 
 export const databases = pgTable("databases", {
     id: text("id").primaryKey(),
@@ -24,6 +25,7 @@ export const applications = pgTable("applications", {
     limit: numeric("limit", { mode: 'number' }).notNull(),
     status: text("status").notNull(),
     alerts: jsonb("alerts").$type<any[]>().notNull(),
+    timezone: text("timezone").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -60,3 +62,27 @@ export const dbLogs = pgTable("dbLogs", {
     data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })
+
+export const appAnalytics = pgTable("app_analytics", {
+    id: text("id").primaryKey(),
+    applicationId: text("application_id").notNull().references(() => applications.id, { onDelete: "cascade" }),
+    type: text("type").$type<AnalyticsEventType>().notNull(),
+    startDate: timestamp("start_date", {
+        withTimezone: true,
+        mode: "date"
+    }).notNull(),
+    endDate: timestamp("end_date", {
+        withTimezone: true,
+        mode: "date"
+    }).notNull(),
+    value: numeric("value", {mode: "number"}).notNull(),
+    prevValue: numeric("prev_value", {mode: "number"}).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    
+}, (table) => [
+    unique("app_analytics_app_type_day_unique").on(
+      table.applicationId,
+      table.type,
+      table.startDate,
+    ),
+])
