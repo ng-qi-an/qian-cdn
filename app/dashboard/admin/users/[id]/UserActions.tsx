@@ -12,50 +12,14 @@ import BanUserDialog from "../dialogs/BanUserDialog";
 import revalidateData from "@/lib/revalidateData";
 import { user as userSchema } from "@/lib/schema/auth-schema";
 import DeleteUserDialog from "../dialogs/DeleteUserDialog";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
 
 export default function UserActions({user, currentUser}: {user: typeof userSchema.$inferSelect, currentUser: User}){
     const [changePasswordDialogOpen, setChangePasswordDialogOpen] = useState(false);
     const [banUserDialogOpen, setBanUserDialogOpen] = useState(false);
     const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
-    const [showDeleteUserResult, setShowDeleteUserResult] = useState(false);
-    const [deleteUserResult, setDeleteUserResult] = useState<{status: string, message: string, details?: {status: string, message: string}[]} | null>();
-    const router = useRouter();
     return <div className="space-y-2 mt-4">
         <Button className="w-full" size="sm" variant="outline" onClick={()=> setChangePasswordDialogOpen(true)}><Key/> Change password</Button>
-        <ChangePasswordDialog open={changePasswordDialogOpen} onOpenChange={setChangePasswordDialogOpen} onConfirm={async (password, revokeSessions)=>{
-            setChangePasswordDialogOpen(false);
-            const { error } = await authClient.admin.setUserPassword({
-                newPassword: password,
-                userId: user.id,
-            });
-            if (error) {
-                return toast.add({
-                    title: "Error changing password",
-                    description: error.message,
-                    type: "error",
-                })
-            } else {
-                if (revokeSessions){
-                    const { error: error2 } = await authClient.admin.revokeUserSessions({
-                        userId: user.id,
-                    });
-                    if (error2) {
-                        toast.add({
-                            title: "Error revoking sessions",
-                            description: error2.message,
-                            type: "error",
-                        })
-                    }
-                }
-                return toast.add({
-                    title: "Success",
-                    description: "The user's password has been changed successfully.",
-                    type: "success",
-                })
-            }
-        }}/>
+        <ChangePasswordDialog open={changePasswordDialogOpen} onOpenChange={setChangePasswordDialogOpen} userId={user.id}/>
         <Button className="w-full" size="sm" variant="outline" onClick={()=>{
             navigator.clipboard.writeText(user.id)
             toast.add({
@@ -86,83 +50,10 @@ export default function UserActions({user, currentUser}: {user: typeof userSchem
         </Button>
         : <>
             <Button disabled={user.id === currentUser.id} className="w-full" size="sm" variant="destructive" onClick={()=> setBanUserDialogOpen(true)}><Ban/> Ban</Button>
-            <BanUserDialog open={banUserDialogOpen} onOpenChange={setBanUserDialogOpen} onConfirm={async (reason, expiryDate)=>{
-                setBanUserDialogOpen(false);
-                const {error} = await authClient.admin.banUser({
-                    userId: user.id,
-                    banReason: reason ?? "No reason provided.",
-                    banExpiresIn: expiryDate ? Math.ceil((expiryDate.getTime() - Date.now()) / 1000) : undefined,
-                });
-                if (error) {
-                    return toast.add({
-                        title: "Error banning user",
-                        description: error.message,
-                        type: "error",
-                    })
-                }
-                toast.add({
-                    title: "Success",
-                    description: "The user has been banned successfully.",
-                    type: "success",
-                })
-                await revalidateData(window.location.pathname)
-            }}/>
+            <BanUserDialog open={banUserDialogOpen} onOpenChange={setBanUserDialogOpen} userId={user.id}/>
         </>}
         <Button disabled={user.id === currentUser.id} className="w-full" size="sm" variant="destructive" onClick={()=> setDeleteUserDialogOpen(true)}><Trash/> Delete</Button>
-        <DeleteUserDialog open={deleteUserDialogOpen} onOpenChange={setDeleteUserDialogOpen} onConfirm={async ()=>{
-            setDeleteUserDialogOpen(false);
-                toast.promise((async() => {
-                    const response = await fetch(`/api/dashboard/users/delete`, {
-                        method: "DELETE",
-                        body: JSON.stringify({
-                            userId: user.id,
-                        }),
-                        headers: {
-                            "Content-Type": "application/json",
-                        }
-                    });
-                    const data = await response.json();
-                    if (response.status == 500){
-                        if (data.error == "FAILED_DELETE_DB_OBJECTS" || data.error == "FAILED_DELETE_USER"){
-                            setShowDeleteUserResult(true);
-                            setDeleteUserResult({status: "error", ...data});
-                            throw new Error("Some databases/applications could not be deleted. Check details for exact failures.");
-                        } else {
-                            throw new Error(data.message || "Unknown error");
-                        }
-                    } else if (response.ok){
-                        setDeleteUserResult(data);
-                        if (data.details.some((r: {status: string, message: string}) => r.status === "warning")){
-                            return setShowDeleteUserResult(true);
-                        }
-                        router.push("/dashboard/admin/users");
-                    } else {
-                        throw new Error(data.message || "Unknown error");
-                    }
-                })(), {
-                    loading: "Deleting user...",
-                    success: "User deleted successfully.",
-                    error: "Error from deleting user.",
-                })
-        }}/>
-        <Dialog open={showDeleteUserResult} onOpenChange={setShowDeleteUserResult}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{deleteUserResult?.status == "success" ? "User deleted successfully" : "Error deleting user"}</DialogTitle>
-                    <DialogDescription>{deleteUserResult?.message}</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-2">
-                    <p className="text-muted-foreground">Additional details:</p>
-                    {deleteUserResult?.details?.map((detail, index)=> {
-                        return <p key={index} className="gap-1">
-                            <span className="font-semibold">{detail.status.toUpperCase()}:</span> {detail.message}
-                        </p>
-                    })}
-                </div>
-                <DialogFooter>
-                    <Button onClick={()=> {setShowDeleteUserResult(false); router.push("/dashboard/admin/users")}}>Close</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <DeleteUserDialog open={deleteUserDialogOpen} onOpenChange={setDeleteUserDialogOpen} userId={user.id}/>
+        
     </div>
 }

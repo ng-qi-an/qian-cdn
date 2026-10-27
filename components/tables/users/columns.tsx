@@ -5,7 +5,7 @@ import { type DataTableFeatures } from "../features"
 import { User } from "@/lib/schema/schemaTypes"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { Ban, Eye, MoreHorizontal, Trash, UserIcon } from "lucide-react"
+import { Ban, Eye, Key, MoreHorizontal, Trash, UserIcon } from "lucide-react"
 import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import SortedColumnHeader from "../SortedColumnHeader"
@@ -16,6 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/toast";
 import { checkUserHasHigherPerms } from "@/lib/permissions/permissionHelpers";
 import { Badge } from "@/components/ui/badge";
+import BanUserDialog from "@/app/dashboard/admin/users/dialogs/BanUserDialog";
+import DeleteUserDialog from "@/app/dashboard/admin/users/dialogs/DeleteUserDialog";
+import ChangePasswordDialog from "@/app/dashboard/admin/users/dialogs/ChangePasswordDialog";
 
 
 // Use `accessor` for data columns and `display` for columns without one.
@@ -120,18 +123,22 @@ export function getUserColumns({banUserAuth, deleteUserAuth, user}: UserColumnsP
             cell: ({ row }) => {
             const [openBan, setOpenBan] = useState(false)
             const [openDelete, setOpenDelete] = useState(false)
-            const targetUserHigherOrSimilarPerms = user.role == row.original.role || (user.role != "superAdmin" && row.original.role == "superAdmin")
+            const [openChangePassword, setOpenChangePassword] = useState(false)
             return <div className="flex justify-end w-full">
+                <BanUserDialog open={openBan} onOpenChange={setOpenBan} userId={row.original.id}/>
+                <DeleteUserDialog open={openDelete} onOpenChange={setOpenDelete} userId={row.original.id}/>
+                <ChangePasswordDialog open={openChangePassword} onOpenChange={setOpenChangePassword} userId={row.original.id}/>
                 <DropdownMenu>
                     <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm">
                         <MoreHorizontal />
                     </Button>}/>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="w-max">
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <Link href={checkUserHasHigherPerms(user.role!, row.original.role!) ? `/dashboard/admin/users/${row.original.id}` : "#"} className={`${checkUserHasHigherPerms(user.role!, row.original.role!) ? "" : "cursor-default"}`} title={checkUserHasHigherPerms(user.role!, row.original.role!) ? "" : "No permission to view user"}>
                                 <DropdownMenuItem  disabled={!checkUserHasHigherPerms(user.role!, row.original.role!)}><Eye/> View user</DropdownMenuItem>
                             </Link>
+                            <DropdownMenuItem disabled={!checkUserHasHigherPerms(user.role!, row.original.role!) || user.id == row.original.id} onClick={()=> setOpenChangePassword(true)}><Key/> Change password</DropdownMenuItem>
                             <DropdownMenuSeparator/>
                             <DropdownMenuItem variant="destructive" disabled={!checkUserHasHigherPerms(user.role!, row.original.role!) || !banUserAuth || user.id == row.original.id} onClick={()=> setOpenBan(true)}><Ban/> Ban</DropdownMenuItem>
                             <DropdownMenuItem variant="destructive" disabled={!checkUserHasHigherPerms(user.role!, row.original.role!) || !deleteUserAuth || user.id == row.original.id} onClick={()=> setOpenDelete(true)}><Trash/>Delete</DropdownMenuItem>

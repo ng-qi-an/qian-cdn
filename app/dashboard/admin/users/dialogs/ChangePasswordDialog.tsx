@@ -2,21 +2,50 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth-client";
 import { generateId } from "better-auth";
 import { Copy, RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
-export default function ChangePasswordDialog({onConfirm, open, onOpenChange}: {onConfirm: (password: string, revokeSessions: boolean) => void, open: boolean, onOpenChange: (open: boolean) => void}){
+export default function ChangePasswordDialog({userId, open, onOpenChange}: {userId: string, open: boolean, onOpenChange: (open: boolean) => void}){
     const [password, setPassword] = useState("");
     const [revokeSessions, setRevokeSessions] = useState(true);
     return <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
-            <form className="contents" onSubmit={(e)=>{
+            <form className="contents" onSubmit={async(e)=>{
                 e.preventDefault();
-                onConfirm(password, revokeSessions);
+                onOpenChange(false);
+                const { error } = await authClient.admin.setUserPassword({
+                    newPassword: password,
+                    userId: userId,
+                });
+                if (error) {
+                    return toast.add({
+                        title: "Error changing password",
+                        description: error.message,
+                        type: "error",
+                    })
+                } else {
+                    if (revokeSessions){
+                        const { error: error2 } = await authClient.admin.revokeUserSessions({
+                            userId: userId,
+                        });
+                        if (error2) {
+                            toast.add({
+                                title: "Error revoking sessions",
+                                description: error2.message,
+                                type: "error",
+                            })
+                        }
+                    }
+                    return toast.add({
+                        title: "Success",
+                        description: "The user's password has been changed successfully.",
+                        type: "success",
+                    })
+                }
             }}>
                 <DialogHeader>
                     <DialogTitle>Change Password</DialogTitle>
@@ -28,7 +57,7 @@ export default function ChangePasswordDialog({onConfirm, open, onOpenChange}: {o
                             <InputGroupInput required type="text" placeholder="Enter new password" value={password} onChange={(e) => setPassword(e.target.value)}/>
                             <InputGroupAddon align="inline-end">
                                 <InputGroupButton onClick={()=>{
-                                    setPassword(generateId(10).toUpperCase())
+                                    setPassword(generateId(16).toUpperCase())
                                 }}>
                                     <RefreshCcw/>
                                 </InputGroupButton>

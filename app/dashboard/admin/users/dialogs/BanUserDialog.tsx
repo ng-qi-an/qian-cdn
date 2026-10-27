@@ -5,10 +5,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth-client";
+import revalidateData from "@/lib/revalidateData";
 import { formatLocalDateTime } from "@/lib/time";
 import { useEffect, useState } from "react";
 
-export default function BanUserDialog({onConfirm, open, onOpenChange}: {onConfirm: (reason: string, expiryDate: Date | null) => void, open: boolean, onOpenChange: (open: boolean) => void}){
+export default function BanUserDialog({userId, open, onOpenChange}: {userId: string, open: boolean, onOpenChange: (open: boolean) => void}){
     const [reason, setReason] = useState("No reason provided.");
     const [hasExpiry, setHasExpiry] = useState(false);
     const [expiryDate, setExpiryDate] = useState(formatLocalDateTime(new Date()));
@@ -21,7 +23,7 @@ export default function BanUserDialog({onConfirm, open, onOpenChange}: {onConfir
     }, [open])
     return <AlertDialog open={open} onOpenChange={onOpenChange}>
         <AlertDialogContent>
-            <form className="contents" onSubmit={(e)=>{
+            <form className="contents" onSubmit={async(e)=>{
                 e.preventDefault();
                 if (hasExpiry && expiryDate && new Date(expiryDate).getTime() <= Date.now()) {
                     return toast.add({
@@ -29,7 +31,25 @@ export default function BanUserDialog({onConfirm, open, onOpenChange}: {onConfir
                         description: "Expiry date must be in the future.",
                     })
                 }
-                onConfirm(reason, hasExpiry ? new Date(expiryDate) : null);
+                const {error} = await authClient.admin.banUser({
+                    userId: userId,
+                    banReason: reason ?? "No reason provided.",
+                    banExpiresIn: expiryDate ? Math.ceil((new Date(expiryDate).getTime() - Date.now()) / 1000) : undefined,
+                });
+                if (error) {
+                    return toast.add({
+                        title: "Error banning user",
+                        description: error.message,
+                        type: "error",
+                    })
+                }
+                toast.add({
+                    title: "Success",
+                    description: "The user has been banned successfully.",
+                    type: "success",
+                })
+                onOpenChange(false);
+                await revalidateData(window.location.pathname)
             }}>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Ban user</AlertDialogTitle>
