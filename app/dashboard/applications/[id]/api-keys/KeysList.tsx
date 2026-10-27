@@ -9,7 +9,7 @@ import CreateKeyDialog from "./CreateKeyDialog";
 import { useTheme } from "next-themes";
 import ApiKeyItem from "./ApiKeyItem";
 
-export default function KeysList({appId, apiKeys}: {appId: string, apiKeys: Omit<ApiKey, "key">[]}){
+export default function KeysList({appId, apiKeys, disableCreate}: {appId: string, apiKeys: Omit<ApiKey, "key">[], disableCreate?: boolean}){
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     return <>{apiKeys.length > 0 ? 
         <div className="pt-4 overflow-auto grid grid-cols-1 gap-2">
@@ -17,7 +17,7 @@ export default function KeysList({appId, apiKeys}: {appId: string, apiKeys: Omit
                 return <ApiKeyItem appId={appId} key={key.id} apiKey={key}/>
             })}
             <div className="flex items-center justify-between mt-2">
-                <Button onClick={()=> setShowCreateDialog(true)} className="w-max">Create API Key</Button>
+                <Button onClick={()=> setShowCreateDialog(true)} className="w-max" disabled={disableCreate}>Create API Key</Button>
                 <p className="text-sm text-muted-foreground text-right">All expired keys are deleted automatically.</p>
             </div>
         </div>
@@ -32,7 +32,7 @@ export default function KeysList({appId, apiKeys}: {appId: string, apiKeys: Omit
             </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-            <Button onClick={()=> setShowCreateDialog(true)}>Create API Key</Button>
+            <Button onClick={()=> setShowCreateDialog(true)} disabled={disableCreate}>Create API Key</Button>
         </EmptyContent>
     </Empty>}
     <CreateKeyDialog appId={appId} isOpen={showCreateDialog} onOpenChange={setShowCreateDialog}/>

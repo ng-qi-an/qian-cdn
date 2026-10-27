@@ -24,7 +24,13 @@ export default async function RenderedDbOverviewPage({params}: {params: Promise<
                     name: true
                 },
                 with: {
-                    appAnalytics: true
+                    appAnalytics: true,
+                    owner: {
+                        columns: {
+                            name: true,
+                            id: true
+                        }
+                    }
                 }
             }
         }

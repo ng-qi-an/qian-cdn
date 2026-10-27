@@ -34,7 +34,7 @@ export const relations = defineRelationsPart({ applications, user, files, databa
         files: r.many.files(),
         appLogs: r.many.appLogs(),
         dbLogs: r.many.dbLogs(),
-        appAnalytics: r.many.appAnalytics()
+        appAnalytics: r.many.appAnalytics(),
     },
     user: {
         applications: r.many.applications(),
@@ -42,7 +42,7 @@ export const relations = defineRelationsPart({ applications, user, files, databa
         dbLogs: r.many.dbLogs()
     },
     apikey: {
-        appLogs: r.many.appLogs()
+        appLogs: r.many.appLogs(),
     },
     appLogs: {
         fromApiKey: r.one.apikey({

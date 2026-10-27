@@ -41,7 +41,7 @@ export default async function DatabasePage({params, children}: {params: Promise<
             <DatabaseSwitcher otherDbs={transformedOtherDbs} dbId={dbData.id} dbName={dbData.name}/>
         </div>}]}/>
         <DashboardBody>
-            <DashboardSectionHeader title={`${dbData.name}`} description={availableServices.find((x)=> x.id == dbData.provider)?.name ?? "Unknown provider"} beforeHeadingRender={<ProviderIcon provider={dbData.provider}/>} actionRender={<Button size="icon-sm" variant="ghost"><Ellipsis/></Button>} />
+            <DashboardSectionHeader title={`${dbData.name}`} description={availableServices.find((x)=> x.id == dbData.provider)?.name ?? "Unknown provider"} beforeHeadingRender={<ProviderIcon provider={dbData.provider}/>} />
             <DatabaseTabs dbId={dbData.id}/>
             <div className="h-full overflow-hidden">
                 {children}

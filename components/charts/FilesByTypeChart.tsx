@@ -76,7 +76,7 @@ export default function FilesByTypeChart({files, showByLimit, limit}: {files: {c
     })
     return <ChartContainer
         config={chartConfig}
-        className="mx-auto aspect-square w-full"
+        className="mx-auto aspect-square w-full max-w-[450px]"
     >
         <PieChart>
             <ChartTooltip

@@ -6,6 +6,7 @@ import { CustomHttpError, InsufficientPermissionsError, UnauthorisedError } from
 import { NextRequest } from "next/server";
 import { unstable_rethrow } from "next/navigation";
 import { ApiKey } from '@better-auth/api-key';
+import { permissionStatement } from './permissions';
 
 export async function getUser(){
     const session = await auth.api.getSession({
@@ -21,7 +22,10 @@ export async function getUser(){
     return user;
 }
 
-export async function userHasPermissionServer(permissions: Record<string, string[]>, existingUser?: User) {
+export async function userHasPermissionServer(
+    permissions: { [K in keyof typeof permissionStatement]?: Array<typeof permissionStatement[K][number]> },
+    existingUser?: User
+) {
     const user = existingUser ?? await getUser();
     const data = await auth.api.userHasPermission({
         body: {

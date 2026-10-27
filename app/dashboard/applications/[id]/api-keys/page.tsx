@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import KeysList from "./KeysList";
+import { db } from "@/lib/db";
 
 export const instant = false;
 
@@ -10,5 +11,13 @@ export default async function APIKeysApplication({params}: {params: Promise<{id:
         headers: await headers()
     })
     const filteredKeys = apiKeys.filter((key)=> key.metadata?.appId === appId);
-    return <KeysList appId={appId} apiKeys={filteredKeys}/>
+    const appData = await db.query.applications.findFirst({
+        where: {
+            id: appId
+        },
+        columns: {
+            status: true
+        },
+    })
+    return <KeysList appId={appId} disableCreate={appData!.status != "active"} apiKeys={filteredKeys}/>
 }
