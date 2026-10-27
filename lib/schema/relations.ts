@@ -38,6 +38,7 @@ export const relations = defineRelationsPart({ applications, user, files, databa
     },
     user: {
         applications: r.many.applications(),
+        databases: r.many.databases(),
         appLogs: r.many.appLogs(),
         dbLogs: r.many.dbLogs()
     },

@@ -10,16 +10,13 @@ import { checkUserHasHigherPerms } from "@/lib/permissions/permissionHelpers";
 import UserActions from "./UserActions";
 import { user as userSchema } from "@/lib/schema/auth-schema";
 import { Badge } from "@/components/ui/badge";
+import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
 export const instant = false;
 
 export default async function UserLayout({children, params}: {children: React.ReactNode, params: Promise<{id: string}>}){
     const { id } = await params;
-    const data = await auth.api.getUser({
-        query: {
-            id,
-        },
-        headers: await headers(),
-    });
+    const data = (await db.select().from(userSchema).where(eq(userSchema.id, id)))[0];
     if (!data) {
         return redirect("/dashboard/admin/users");
     }
