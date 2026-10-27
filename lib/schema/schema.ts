@@ -55,8 +55,8 @@ export const appLogs = pgTable("app_logs", {
 export const dbLogs = pgTable("dbLogs", {
     id: text("id").primaryKey(),
     databaseId: text("database_id").notNull().references(() => databases.id, { onDelete: "cascade" }),
-    fromUserId: text("from_user_id").references(() => user.id, { onDelete: "no action" }),
-    fromAppId: text("from_app_id").references(() => applications.id, { onDelete: "no action" }),
+    fromUserId: text("from_user_id").references(() => user.id, { onDelete: "set null" }),
+    fromAppId: text("from_app_id").references(() => applications.id, { onDelete: "set null" }),
     code: text("type").$type<DbLogCode>().notNull(),
     data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),

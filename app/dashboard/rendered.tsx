@@ -13,9 +13,10 @@ export default async function RenderedDashboardPage({searchParams}: {searchParam
     const viewAllApplicationsPerms = await userHasPermissionServer({
         applications: ["viewAll"]
     })
+    const adminView = view == "admin"
     const fetchedApps = await db.query.applications.findMany({
         where: {
-            ownerId: (viewAllApplicationsPerms.isAuthorised && view != "personal") ? {isNotNull: true} : viewAllApplicationsPerms.user.id
+            ownerId: (viewAllApplicationsPerms.isAuthorised && adminView) ? {isNotNull: true} : viewAllApplicationsPerms.user.id
         },
         with: {
             appAnalytics: true,
@@ -27,9 +28,9 @@ export default async function RenderedDashboardPage({searchParams}: {searchParam
             }
         }
     })
-    const fetchedDbs = createDatabasePerms.isAuthorised ? await db.query.databases.findMany({
+    const fetchedDbs = createDatabasePerms.isAuthorised ? (await db.query.databases.findMany({
         where: {
-            ownerId: (viewAllDatabasesPerms.isAuthorised && view != "personal") ? {isNotNull: true} : viewAllDatabasesPerms.user.id
+            ownerId: (viewAllDatabasesPerms.isAuthorised && adminView) ? {isNotNull: true} : viewAllDatabasesPerms.user.id
         },
         with: {
             files: {
@@ -39,6 +40,6 @@ export default async function RenderedDashboardPage({searchParams}: {searchParam
                 }
             }
         }
-    }) : []
-    return <ClientRenderedDashboardPage view={view} isAdmin={viewAllApplicationsPerms.isAuthorised} user={viewAllApplicationsPerms.user} fetchedApps={fetchedApps} fetchedDbs={fetchedDbs} />
+    })): []
+    return <ClientRenderedDashboardPage adminView={adminView} isAdmin={viewAllApplicationsPerms.isAuthorised} user={viewAllApplicationsPerms.user} fetchedApps={fetchedApps} fetchedDbs={fetchedDbs} />
 }

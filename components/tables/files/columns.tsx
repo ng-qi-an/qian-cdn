@@ -48,9 +48,9 @@ export const filesColumns = columnHelper.columns([
         cell: ({row}) => {
             const name = row.original.name
             const Icon = mimeToIcon(row.original.contentType)
-            return <div className="flex flex-1 items-center">
-                <Icon className="size-4 mr-2"/>
-                {name}
+            return <div className="flex flex-1 max-w-[250px] md:max-w-[300px] lg:max-w-[400px] xl:max-w-[450px] min-w-0 items-center text-ellipsis">
+                <Icon className="size-4 mr-2 shrink-0"/>
+                <p className="text-ellipsis overflow-hidden">{name}</p>
                 
             </div>
         }
