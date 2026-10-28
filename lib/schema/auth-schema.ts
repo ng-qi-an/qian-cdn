@@ -28,8 +28,8 @@ export const session = pgTable("session", {
  countryCode: text('country_code'),
  countryName: text('country_name'),
  cityName: text('city_name'),
- latitude: integer('latitude'),
- longitude: integer('longitude')
+ latitude: text('latitude'),
+ longitude: text('longitude')
 					}, (table) => [
   index("session_userId_idx").on(table.userId),
 ]);

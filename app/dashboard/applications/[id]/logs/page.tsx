@@ -1,9 +1,11 @@
-import { getLogsColumns } from "@/components/tables/logs/columns";
-import { LogsDataTable } from "@/components/tables/logs/data-table";
 import { db } from "@/lib/db";
 import { Suspense } from "react";
 import LogsPageClient from "./client";
 import { userHasPermissionServer } from "@/lib/permissions/serverPermissionHelpers";
+
+export const metadata = {
+    title: 'Logs',
+};
 
 export default async function ApplicationLogs({params}: {params: Promise<{id: string}>}){
     return <Suspense>

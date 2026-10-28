@@ -73,11 +73,11 @@ export default function SignInPage() {
             <Button type="submit" disabled={submitting} className="w-full">
               {submitting ? <Spinner/> : "Sign In"}
             </Button>
-            <Link href="/auth/sign-up" className="w-full">
+            {process.env.NEXT_PUBLIC_ENABLE_SIGNUP == "true" && <Link href="/auth/sign-up" className="w-full">
               <Button disabled={submitting} type="button" size="xs" variant="link" className="w-full text-xs mt-0 text-muted-foreground hover:text-foreground">
                 Sign Up
               </Button>
-            </Link>
+            </Link>}
           </CardFooter>
       </Card>
     </form>

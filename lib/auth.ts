@@ -11,9 +11,11 @@ export const auth = betterAuth({
         provider: "pg",
         schema,
     }),
+    trustedOrigins: process.env.NEXT_PUBLIC_TRUSTED_ORIGINS?.split(",") || [],
     emailAndPassword: { 
         enabled: true, 
         revokeSessionsOnPasswordReset: true, 
+        disableSignUp: process.env.NEXT_PUBLIC_ALLOW_SIGNUP == "false" ? true : false,
     }, 
     user: {
         additionalFields: {
@@ -38,12 +40,12 @@ export const auth = betterAuth({
                 input: false,
             },
             latitude: {
-                type: "number",
+                type: "string",
                 required: false,
                 input: false,
             },
             longitude: {
-                type: "number",
+                type: "string",
                 required: false,
                 input: false,
             },

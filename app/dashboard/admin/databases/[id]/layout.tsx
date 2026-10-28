@@ -10,8 +10,27 @@ import DatabaseTabs from "./DatabaseTabs";
 import { Button } from "@/components/ui/button";
 import { Ellipsis } from "lucide-react";
 import { availableServices } from "@/lib/services";
+import { Metadata } from "next";
 
 export const instant = false;
+
+export async function generateMetadata({params}: {params: Promise<{id: string}>}): Promise<Metadata> {
+    const { id } = await params;
+    const data = await db.query.databases.findFirst({
+        where: {
+            id
+        },
+        columns: {
+            name: true
+        }
+    })
+    return {
+        title: {
+            template: `%s - ${data?.name ?? "Database"} | UnifiedCDN`,
+            default: "Overview - " + (data?.name ?? "Database") + " | UnifiedCDN",
+        },
+    }
+}
 
 export default async function DatabasePage({params, children}: {params: Promise<{id: string}>, children: React.ReactNode}){
     const { id } = await params;

@@ -10,8 +10,27 @@ import ApplicationTabs from "./ApplicationTabs";
 import { Button } from "@/components/ui/button";
 import { AppWindowMac, Ellipsis } from "lucide-react";
 import { availableServices } from "@/lib/services";
+import { Metadata } from "next";
 
 export const instant = false;
+
+export async function generateMetadata({params}: {params: Promise<{id: string}>}): Promise<Metadata> {
+    const { id } = await params;
+    const data = await db.query.applications.findFirst({
+        where: {
+            id
+        },
+        columns: {
+            name: true
+        }
+    })
+    return {
+        title: {
+            template: `%s - ${data?.name ?? "Application"} | UnifiedCDN`,
+            default: "Overview - " + (data?.name ?? "Application") + " | UnifiedCDN",
+        },
+    }
+}
 
 export default async function ApplicationPage({params, children}: {params: Promise<{id: string}>, children: React.ReactNode}){
     const { id } = await params;

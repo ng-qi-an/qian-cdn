@@ -4,6 +4,11 @@ import DashboardHeader from "@/components/navigation/DashboardHeader";
 import DashboardSectionHeader from "@/components/navigation/DashboardSectionHeader";
 import { Suspense } from "react";
 import RenderedLogsPage from "./rendered";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Logs',
+};
 
 export default function LogsPage() {
     return <Dashboard>

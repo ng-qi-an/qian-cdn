@@ -9,17 +9,23 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import KeyDialogContent from "./KeyDialogContent";
 import { formatLocalDateTime } from "@/lib/time";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 
-export default function CreateKeyDialog({appId, isOpen, onOpenChange}: {appId: string,isOpen: boolean, onOpenChange: (open: boolean) => void}){
+export default function CreateKeyDialog({appId, isOpen, onOpenChange, fetchedApps}: {appId: string | null, fetchedApps?: {name: string, id:string}[], isOpen: boolean, onOpenChange: (open: boolean) => void}){
     const [name, setName] = useState("");
     const [hasExpiry, setHasExpiry] = useState(false);
     const [expiryDate, setExpiryDate] = useState(formatLocalDateTime(new Date()));
     const [showKeyDialog, setShowKeyDialog] = useState(false);
     const [copied, setCopied] = useState(false);
     const [key, setKey] = useState("");
+    const [selectedAppId, setSelectedAppId] = useState(appId);
     const pathname = usePathname();
+    if (!appId && !fetchedApps) {
+        return <p>No appid or app list provided</p>
+    }
     return <>
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 <DialogContent>
@@ -46,7 +52,7 @@ export default function CreateKeyDialog({appId, isOpen, onOpenChange}: {appId: s
                                     name,
                                     hasExpiry,
                                     expiryDate: hasExpiry ? new Date(expiryDate).toISOString() : null,
-                                    appId
+                                    appId: selectedAppId
                                 }),
                                 headers: {
                                     'Accept': 'application/json',
@@ -67,6 +73,7 @@ export default function CreateKeyDialog({appId, isOpen, onOpenChange}: {appId: s
                             setHasExpiry(false);
                             setExpiryDate(formatLocalDateTime(new Date()));
                             setShowKeyDialog(true);
+                            await revalidateData(pathname);
                         } catch (error) {
                             console.error(error)
                             toast.add({
@@ -80,6 +87,19 @@ export default function CreateKeyDialog({appId, isOpen, onOpenChange}: {appId: s
                             <DialogTitle>Create API Key</DialogTitle>
                         </DialogHeader>
                         <KeyDialogContent name={name} setName={setName} hasExpiry={hasExpiry} setHasExpiry={setHasExpiry} expiryDate={expiryDate} setExpiryDate={setExpiryDate}/>
+                        {fetchedApps && <Field>
+                            <Label>Application</Label>
+                            <Select items={fetchedApps.map((app)=> ({label: app.name, value: app.id})) || []} value={selectedAppId} onValueChange={(value)=> setSelectedAppId(value)} required>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select an application" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {fetchedApps?.map((app)=> {
+                                        return <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                                    })}
+                                </SelectContent>
+                            </Select>
+                        </Field>}
                         <DialogFooter>
                             <Button type="button" variant="secondary" onClick={()=> onOpenChange(false)}>Cancel</Button>
                             <Button type="submit">Create</Button>
@@ -91,7 +111,6 @@ export default function CreateKeyDialog({appId, isOpen, onOpenChange}: {appId: s
             setCopied(false)
             setKey("")
             setShowKeyDialog(x)
-            await revalidateData(pathname)
         }}>
             <DialogContent>
                 <DialogHeader>
@@ -118,7 +137,6 @@ export default function CreateKeyDialog({appId, isOpen, onOpenChange}: {appId: s
                         setCopied(false)
                         setKey("")
                         setShowKeyDialog(false)
-                        await revalidateData(pathname)
                     }}>Close</Button>
                     <Button disabled={copied} type="button" onClick={()=>{
                         navigator.clipboard.writeText(key)

@@ -86,8 +86,8 @@ export default function ClientUsersPage({fetchedUsers}: {fetchedUsers: {email: s
                     type: "success"
                 });
             }}>
-                <div className="w-full h-full overflow-auto xl:grid xl:grid-cols-2 gap-1 space-y-2 xl:space-y-0 p-1">
-                    <Card className="w-full h-max xl:h-full">
+                <div className="w-full h-full overflow-auto gap-1 space-y-2 xl:space-y-0 p-1">
+                    <Card className="w-full h-max">
                         <CardHeader>
                             <CardTitle>General</CardTitle>
                             <CardDescription>Information about your new user</CardDescription>

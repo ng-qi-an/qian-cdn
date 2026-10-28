@@ -8,6 +8,11 @@ import ApplicationsRendered from "./rendered";
 import { Suspense } from "react";
 import Link from "next/link";
 import DashboardViewLayoutSwitch from "@/components/navigation/DashboardViewLayoutSwitch";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Applications',
+};
 
 export default function ApplicationsPage({searchParams}: {searchParams: Promise<{layout?: string | undefined}>}){
     return <Dashboard>

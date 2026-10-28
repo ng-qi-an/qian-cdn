@@ -4,6 +4,7 @@ import UserPageClient from "./client";
 import { db } from "@/lib/db";
 import { session } from "@/lib/schema/auth-schema";
 import { desc, eq } from "drizzle-orm";
+import { Metadata } from "next";
 
 export const instant = false;
 

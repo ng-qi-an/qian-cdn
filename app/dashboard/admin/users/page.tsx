@@ -7,6 +7,11 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import RenderedUsers from "./rendered";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Users',
+};
 
 export default function UsersPage(){
     return <Dashboard>

@@ -1,8 +1,11 @@
 import { FilesDataTable } from "@/components/tables/files/data-table";
 import { filesColumns } from "@/components/tables/files/columns";
 import { db } from "@/lib/db";
-import { files } from "@/lib/schema/schema";
-import { eq } from "drizzle-orm";
+
+export const metadata = {
+    title: 'Files',
+};
+
 
 export const instant = false;
 

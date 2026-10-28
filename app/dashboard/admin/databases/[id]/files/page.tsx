@@ -4,6 +4,10 @@ import { db } from "@/lib/db";
 import { files } from "@/lib/schema/schema";
 import { eq } from "drizzle-orm";
 
+export const metadata = {
+    title: 'Files',
+};
+
 export const instant = false;
 
 export default async function ApplicationFiles({params}: {params: Promise<{id: string}>}) {

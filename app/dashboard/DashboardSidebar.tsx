@@ -5,27 +5,36 @@ import Link from "next/link";
 import { Suspense } from "react";
 import UserDropdown from "./UserDropdown";
 import DashboardSidebarLink from "./DashboardSidebarLink";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-const links = {
-    navigation: [
-        {name: "Dashboard", href: "/dashboard", icon: <Home/>},
-        {name: "Applications", href: "/dashboard/applications", icon: <AppWindowMac/>},
-        {name: "API Keys", href: "/dashboard/api-keys", icon: <Key/>},
-        {name: "Logs", href: "/dashboard/logs", icon: <Logs/>},
-    ],
-    management: [
-        {name: "Users", href: "/dashboard/admin/users", icon: <Users/>},
-        {name: "Databases", href: "/dashboard/admin/databases", icon: <Database/>},
-        {name: "Audit", href: "/dashboard/admin/audit", icon: <Shield/>},
-        {name: "Settings", href: "/dashboard/admin/settings", icon: <Settings/>},
-    ],
-    help: [
-        {name: "Documentation", href: "/", icon: <Book/>},
-        {name: "Github", href: "/", icon: <ExternalLink/>},
-    ]
-}
 
 export default async function DashboardSidebar() {
+    const data = await auth.api.getSession({
+        headers: await headers()
+    })
+    if (!data?.user) return null;
+    
+    const links: {[header: string]: {name: string, href: string, icon: React.ReactNode}[]} = {
+        navigation: [
+            {name: "Dashboard", href: "/dashboard", icon: <Home/>},
+            {name: "Applications", href: "/dashboard/applications", icon: <AppWindowMac/>},
+            {name: "API Keys", href: "/dashboard/api-keys", icon: <Key/>},
+            {name: "Logs", href: "/dashboard/logs", icon: <Logs/>},
+        ],
+        ...(data.user.role == "admin" || data.user.role == "superAdmin" ? {
+            management: [
+                    {name: "Users", href: "/dashboard/admin/users", icon: <Users/>},
+                    {name: "Databases", href: "/dashboard/admin/databases", icon: <Database/>},
+                    {name: "Audit", href: "/dashboard/admin/audit", icon: <Shield/>},
+                    {name: "Settings", href: "/dashboard/admin/settings", icon: <Settings/>},
+            ],
+        } : {}),
+        help: [
+            {name: "Documentation", href: "/", icon: <Book/>},
+            {name: "Github", href: "/", icon: <ExternalLink/>},
+        ]
+    }
     return <Sidebar>
         <SidebarHeader>
             <SidebarMenu>

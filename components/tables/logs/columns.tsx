@@ -35,9 +35,9 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                 cell: ({row})=>{
                     const log = row.original
                     if (log.fromUserId) {
-                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
+                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser ? log.fromUser.name : "Unknown user"}</p></Link>
                     } else if (log.fromApiKeyId) {
-                        return <Link href={`/dashboard/applications/${log.applicationId}/api-keys`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><Key className="size-4"/> {log.fromApiKey.name}</p></Link>
+                        return <Link href={`/dashboard/applications/${log.applicationId}/api-keys`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><Key className="size-4"/> {log.fromApiKey ? log.fromApiKey.name : "Unknown API Key"}</p></Link>
                     }
                 }
             }),
@@ -48,7 +48,7 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                 cell: ({row}) => {
                     const log = row.original
                     const provider = availableServices.find(s => s.id === log.application?.database?.provider)
-                    return <Link href={`/dashboard/applications/${log.applicationId}`} className={`hover:underline flex items-center gap-2`} title="View application details">{provider && <provider.icon className="size-4"/>}<p className="flex items-center gap-2">{log.application?.name ?? "Unknown app"}</p></Link>
+                    return <Link href={`/dashboard/applications/${log.applicationId}`} className={`hover:underline flex items-center gap-2`} title="View application details">{provider && <provider.icon className="size-4"/>}<p className="flex items-center gap-2">{log.application ? log.application.name : "Unknown app"}</p></Link>
                 }
             }))
         }
@@ -68,9 +68,9 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                 cell: ({row})=>{
                     const log = row.original
                     if (log.fromUserId) {
-                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
+                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser ? log.fromUser.name : "Unknown user"}</p></Link>
                     } else {
-                        return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View application details"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp.name}</p></Link>
+                        return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View application details"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp ? log.fromApp.name : "Unknown app"}</p></Link>
                     }
                 }
             }),
@@ -80,7 +80,7 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                 cell: ({row})=>{
                     const log = row.original
                     if (log.fromAppId) {
-                        return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp.name}</p></Link>
+                        return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp ? log.fromApp.name : "Unknown app"}</p></Link>
                     } else {
                         return <p className="text-muted-foreground">N/A</p>
                     }

@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  allowedDevOrigins: ['unified-cdn-tunnel.ngqian.com'],
 };
 
 export default nextConfig;

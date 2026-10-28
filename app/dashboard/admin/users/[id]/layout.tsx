@@ -12,7 +12,27 @@ import { user as userSchema } from "@/lib/schema/auth-schema";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
+import { Metadata } from "next";
+
 export const instant = false;
+
+export async function generateMetadata({params}: {params: Promise<{id: string}>}): Promise<Metadata> {
+    const { id } = await params;
+    const data = await db.query.user.findFirst({
+        where: {
+            id
+        },
+        columns: {
+            name: true
+        }
+    })
+    return {
+        title: {
+            template: `%s - ${data?.name ?? "User"} | UnifiedCDN`,
+            default: (data?.name ?? "User") + " | UnifiedCDN",
+        },
+    }
+}
 
 export default async function UserLayout({children, params}: {children: React.ReactNode, params: Promise<{id: string}>}){
     const { id } = await params;

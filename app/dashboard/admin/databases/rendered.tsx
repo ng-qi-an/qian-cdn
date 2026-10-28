@@ -57,7 +57,7 @@ export default async function DatabasesRendered({searchParams}: {searchParams: P
         </Empty>}
         <Label className="text-sm mt-8">Other public databases</Label>
         {publicDbs.length > 0 ? <div className={`grid ${layout == 'list' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'} mt-3`}>
-            {publicDbs.map((db, index) => <DatabaseItem length={publicDbs.length} key={db.id} index={index} db={db} layout={layout || 'grid'}/>)}
+            {publicDbs.map((db, index) => <DatabaseItem disabled={!viewAllDbPerms.isAuthorised && db.ownerId != viewAllDbPerms.user.id} disabledReason={"You can't view a database that you don't own."} length={publicDbs.length} key={db.id} index={index} db={db} layout={layout || 'grid'}/>)}
         </div> : <Empty className="border mt-4 h-full flex-0">
             <EmptyHeader>
                 <EmptyMedia variant="icon">

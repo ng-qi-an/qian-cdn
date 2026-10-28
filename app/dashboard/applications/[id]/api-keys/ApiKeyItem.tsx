@@ -12,8 +12,9 @@ import { formatLocalDateTime } from "@/lib/time";
 import revalidateData from "@/lib/revalidateData";
 import { usePathname } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { apikey } from "@/lib/schema/auth-schema";
 
-export default function ApiKeyItem({apiKey, appId}: {apiKey: Omit<ApiKey, "key">, appId: string}){
+export default function ApiKeyItem({apiKey, appId}: {apiKey: Omit<typeof apikey.$inferSelect, "key">, appId: string}){
     const { resolvedTheme } = useTheme();
     const [rendered, setRendered] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);

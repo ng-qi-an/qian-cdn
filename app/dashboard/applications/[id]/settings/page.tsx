@@ -5,6 +5,10 @@ import { applications } from "@/lib/schema/schema";
 
 export const instant = false;
 
+export const metadata = {
+    title: 'Settings',
+};
+
 export default async function ApplicationSettings({params}:{params: Promise<{id: string}>}){
     const { id } = await params;
     const appData = await db.query.applications.findFirst({
