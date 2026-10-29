@@ -8,6 +8,10 @@ import CreateDatabasesRendered from "./rendered";
 import { Suspense } from "react";
 import Link from "next/link";
 
+export const metadata = {
+    title: "Create database",
+}
+
 export default function ApplicationsPage(){
     return <Dashboard>
         <DashboardHeader breadcrumbs={[{name: "Databases", href: "/dashboard/admin/databases"}, {name: "Create database"}]}/>

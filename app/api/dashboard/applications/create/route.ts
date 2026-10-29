@@ -1,7 +1,10 @@
+import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
 import { db } from "@/lib/db";
-import { userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissions/serverPermissionHelpers";
-import { applications } from "@/lib/schema/schema";
+import { InvalidConfigurationError } from "@/lib/errors";
+import { errorToResponse, userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissions/serverPermissionHelpers";
+import { applications, databases } from "@/lib/schema/schema";
 import { generateId } from "better-auth";
+import { eq } from "drizzle-orm";
 
 export const POST = verifyUserWithPermission(async(user)=>{
     return (await userHasPermissionServer({applications: ['create']}, user)).isAuthorised || (await userHasPermissionServer({applications: ['request']}, user)).isAuthorised;
@@ -13,6 +16,10 @@ export const POST = verifyUserWithPermission(async(user)=>{
     if (requiredKeys.filter(key => !Object.keys(data).includes(key)).length > 0) {
         console.log("Missing required keys. Expected:", requiredKeys, "Got:", Object.keys(data));
         return Response.json({ error: "INVALID_CONFIGURATION", message: "Configuration does not match expectations." }, { status: 400 });
+    }
+    const dbData = (await db.select().from(databases).where(eq(databases.id, data.databaseId)).limit(1))[0]
+    if (!dbData) {
+        return errorToResponse(new InvalidConfigurationError("Database not found"));
     }
     const createPerms = await userHasPermissionServer({applications: ['create']}, user);
     const payload: typeof applications.$inferInsert = {
@@ -31,5 +38,6 @@ export const POST = verifyUserWithPermission(async(user)=>{
         console.error(error);
         return Response.json({ error: "INTERNAL", message: "Unexpected error occurred while creating application."}, {status: 500});
     }
+    await makeAuditLog({userId: user.id, code: "APPLICATION_CREATED", data: {application: {id: payload.id, name: payload.name}, database: {id: dbData.id, name: dbData.name}}});
     return Response.json({ message: "Application created successfully", id: payload.id }, { status: 200 });
 })

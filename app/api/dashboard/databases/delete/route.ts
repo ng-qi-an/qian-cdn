@@ -1,4 +1,5 @@
 import { deleteFiles } from "@/lib/actions/files/deleteFiles";
+import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissions/serverPermissionHelpers";
@@ -51,6 +52,7 @@ export const DELETE = verifyUser(async(req: Request, ctx, user) => {
                 }
             }
         }
+        await makeAuditLog({userId: user.id, code: "DATABASE_DELETED", data: {database: {id: dbData.id, name: dbData.name, provider: dbData.provider}}});
         return Response.json({message: "Database deleted successfully!"}, {status: 200});
     } catch (error) {
         console.error("Error deleting database:", error);

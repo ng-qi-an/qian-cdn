@@ -1,3 +1,4 @@
+import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
 import { db } from "@/lib/db";
 import { userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissions/serverPermissionHelpers";
 import { HCDNAuthenticationError } from "@/lib/providers/hcdn/errors";
@@ -90,6 +91,7 @@ export const POST = verifyUserWithPermission(async(user)=>{
     }
     try {
         await db.insert(databases).values(payload);
+        await makeAuditLog({userId: user.id, code: "DATABASE_CREATED", data: {database: {id: payload.id, name: payload.name, provider: payload.provider}}});
     } catch (error) {
         console.error(error);
         return Response.json({ error: "INTERNAL", message: "Unexpected error occurred while creating database."}, {status: 500});

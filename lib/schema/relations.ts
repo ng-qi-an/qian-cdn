@@ -1,8 +1,8 @@
 import { defineRelationsPart } from "drizzle-orm";
-import { appAnalytics, applications, appLogs, databases, dbLogs, files } from "./schema";
+import { appAnalytics, applications, appLogs, auditLogs, databases, dbLogs, files } from "./schema";
 import { apikey, user } from "./auth-schema";
 
-export const relations = defineRelationsPart({ applications, user, files, databases, apikey, appLogs, dbLogs, appAnalytics }, (r) => ({
+export const relations = defineRelationsPart({ applications, user, files, databases, apikey, appLogs, dbLogs, auditLogs, appAnalytics }, (r) => ({
     files: {
         database: r.one.databases({
             from: r.files.databaseId,
@@ -40,7 +40,8 @@ export const relations = defineRelationsPart({ applications, user, files, databa
         applications: r.many.applications(),
         databases: r.many.databases(),
         appLogs: r.many.appLogs(),
-        dbLogs: r.many.dbLogs()
+        dbLogs: r.many.dbLogs(),
+        auditLogs: r.many.auditLogs(),
     },
     apikey: {
         appLogs: r.many.appLogs(),
@@ -71,6 +72,12 @@ export const relations = defineRelationsPart({ applications, user, files, databa
         fromApp: r.one.applications({
             from: r.dbLogs.fromAppId,
             to: r.applications.id
+        }),
+    },
+    auditLogs: {
+        fromUser: r.one.user({
+            from: r.auditLogs.fromUserId,
+            to: r.user.id
         }),
     },
     appAnalytics: {

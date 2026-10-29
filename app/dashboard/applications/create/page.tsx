@@ -8,6 +8,10 @@ import CreateApplicationsRendered from "./rendered";
 import { Suspense } from "react";
 import Link from "next/link";
 
+export const metadata = {
+    title: "Create application",
+}
+
 export default function ApplicationsPage(){
     return <Dashboard>
         <DashboardHeader breadcrumbs={[{name: "Applications", href: "/dashboard/applications"}, {name: "Create application"}]}/>

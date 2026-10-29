@@ -1,4 +1,5 @@
 import { deleteFiles } from "@/lib/actions/files/deleteFiles";
+import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
 import { db } from "@/lib/db";
 import { NotFoundError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissions/serverPermissionHelpers";
@@ -14,7 +15,9 @@ export const DELETE = verifyUser(async(req: Request, ctx, user) => {
             database: {
                 columns: {
                     provider: true,
-                    keys: true
+                    keys: true,
+                    id: true,
+                    name: true
                 }
             },
             files: {
@@ -29,10 +32,13 @@ export const DELETE = verifyUser(async(req: Request, ctx, user) => {
         return errorToResponse(new NotFoundError("Application is not found or you do not have permission to delete it."));
     }
     try {
-        if (appData.files.length > 0) {
-            await deleteFiles({filesFromDb: appData.files, keys: appData.database?.keys, provider: appData.database?.provider ?? ""});
+        if (appData.database){
+            if (appData.files.length > 0) {
+                await deleteFiles({filesFromDb: appData.files, keys: appData.database?.keys, provider: appData.database?.provider ?? ""});
+            }
         }
         await db.delete(applications).where(eq(applications.id, appData.id));
+        await makeAuditLog({userId: user.id, code: "APPLICATION_DELETED", data: {application: {id: appData.id, name: appData.name}, database: {id: appData.database?.id ?? "undefined", name: appData.database?.name ?? "Unknown database"}}});
         return Response.json({message: "Application deleted successfully!"}, {status: 200});
     } catch (error) {
         console.error("Error deleting app:", error);

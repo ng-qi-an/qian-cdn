@@ -1,6 +1,6 @@
 import { integer, timestamp, jsonb, numeric, pgTable, text, date, unique } from "drizzle-orm/pg-core";
 import { apikey, user } from "./auth-schema";
-import type { AppLogCode, DbLogCode } from "../actions/logs/codes";
+import type { AppLogCode, AuditLogCode, DbLogCode } from "../actions/logs/codes";
 import { AnalyticsEventType } from "../actions/analytics/eventTypes";
 
 export const databases = pgTable("databases", {
@@ -58,6 +58,14 @@ export const dbLogs = pgTable("dbLogs", {
     fromUserId: text("from_user_id").references(() => user.id, { onDelete: "set null" }),
     fromAppId: text("from_app_id").references(() => applications.id, { onDelete: "set null" }),
     code: text("type").$type<DbLogCode>().notNull(),
+    data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+})
+
+export const auditLogs = pgTable("audit_logs", {
+    id: text("id").primaryKey(),
+    fromUserId: text("from_user_id").references(() => user.id, { onDelete: "set null" }),
+    code: text("type").$type<AuditLogCode>().notNull(),
     data: jsonb("data").$type<Record<string, any>>().default({}).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })

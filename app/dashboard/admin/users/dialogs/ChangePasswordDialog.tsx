@@ -4,14 +4,16 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { toast } from "@/components/ui/toast";
+import { makeAuditLogClient } from "@/lib/actions/logs/makeAuditLogClient";
 import { authClient } from "@/lib/auth-client";
 import { generateId } from "better-auth";
 import { Copy, RefreshCcw } from "lucide-react";
 import { useState } from "react";
 
-export default function ChangePasswordDialog({userId, open, onOpenChange}: {userId: string, open: boolean, onOpenChange: (open: boolean) => void}){
+export default function ChangePasswordDialog({userId, userName, open, onOpenChange}: {userId: string, userName: string, open: boolean, onOpenChange: (open: boolean) => void}){
     const [password, setPassword] = useState("");
     const [revokeSessions, setRevokeSessions] = useState(true);
+    const { data } = authClient.useSession();
     return <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
             <form className="contents" onSubmit={async(e)=>{
@@ -40,6 +42,7 @@ export default function ChangePasswordDialog({userId, open, onOpenChange}: {user
                             })
                         }
                     }
+                    await makeAuditLogClient({userId: data!.user.id, code: "USER_PASSWORD_CHANGED", data: {user: {id: userId, name: userName}}});
                     return toast.add({
                         title: "Success",
                         description: "The user's password has been changed successfully.",

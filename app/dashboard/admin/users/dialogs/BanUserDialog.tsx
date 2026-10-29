@@ -5,15 +5,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { makeAuditLogClient } from "@/lib/actions/logs/makeAuditLogClient";
 import { authClient } from "@/lib/auth-client";
 import revalidateData from "@/lib/revalidateData";
 import { formatLocalDateTime } from "@/lib/time";
 import { useEffect, useState } from "react";
 
-export default function BanUserDialog({userId, open, onOpenChange}: {userId: string, open: boolean, onOpenChange: (open: boolean) => void}){
+export default function BanUserDialog({userId, userName, open, onOpenChange}: {userId: string, userName: string, open: boolean, onOpenChange: (open: boolean) => void}){
     const [reason, setReason] = useState("No reason provided.");
     const [hasExpiry, setHasExpiry] = useState(false);
     const [expiryDate, setExpiryDate] = useState(formatLocalDateTime(new Date()));
+    const { data } = authClient.useSession();
     useEffect(()=>{
         if (open){
             setReason("No reason provided.");
@@ -43,6 +45,7 @@ export default function BanUserDialog({userId, open, onOpenChange}: {userId: str
                         type: "error",
                     })
                 }
+                await makeAuditLogClient({userId: data!.user.id, code: "USER_BANNED", data: {user: {id: userId, name: userName}, reason: reason ?? "No reason provided.", expiresTimestamp: hasExpiry ? new Date(expiryDate).getTime() : undefined}});
                 toast.add({
                     title: "Success",
                     description: "The user has been banned successfully.",

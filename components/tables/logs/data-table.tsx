@@ -16,19 +16,33 @@ import { features, type DataTableFeatures } from "../features"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
-import { AppWindowMac, ListFilter } from "lucide-react"
+import { AppWindowMac, ListFilter, User } from "lucide-react"
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox"
-import { appLogCodes } from "@/lib/actions/logs/codes"
+import { appLogCodes, auditLogCodes, dbLogCodes } from "@/lib/actions/logs/codes"
 
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
-  type: "app" | "db"
+  type: "app" | "db" | "audit"
 }
 
-type LogWithApplication = {
+type AppLogWithApplication = {
   application?: {
     id: string | number
+    name: string
+  }
+}
+
+type DbLogWithApplication = {
+  fromApp?: {
+    id: string | number
+    name: string
+  }
+}
+
+type AuditLogWithUser = {
+  fromUser?: {
+    id: string
     name: string
   }
 }
@@ -60,18 +74,33 @@ export function LogsDataTable<TData extends RowData>({
   })
   const apps: { label: string; value: string }[] = []
   const appIds = new Set<string>()
+  if (type === "app" || type == "db") {
+    data.forEach((log) => {
+      const app = type == "app" ? (log as TData & AppLogWithApplication).application : type == "db" && (log as TData & DbLogWithApplication).fromApp
+      if (!app) return
+      const value = String(app.id)
+      if (!appIds.has(value)) {
+        appIds.add(value)
+        apps.push({ label: String(app.name), value })
+      }
+    })
+  }
+  const users: { label: string; value: string }[] = []
+  const userIds = new Set<string>()
+  if (type == "audit"){
+    data.forEach((log) => {
+      const user = (log as TData & AuditLogWithUser).fromUser
+      if (!user) return
 
-  data.forEach((log) => {
-    const app = (log as TData & LogWithApplication).application
-    if (!app) return
-
-    const value = String(app.id)
-    if (!appIds.has(value)) {
-      appIds.add(value)
-      apps.push({ label: String(app.name), value })
-    }
-  })
-  const applicationColumn = table.getColumn(type === "app" ? "applicationId" : "application")
+      const value = String(user.id)
+      if (!userIds.has(value)) {
+        userIds.add(value)
+        users.push({ label: String(user.name), value })
+      }
+    })
+  }
+  const applicationColumn = type == "app" ? table.getColumn("applicationId") : type == "db" ? table.getColumn("fromAppId") : null
+  const usersColumn = type == "audit" ? table.getColumn("subject") : null
   const codeColumn = table.getColumn("code")
   const selectedApplicationId = applicationColumn?.getFilterValue() as string | undefined
   const selectedApplication = apps.find((app) => app.value === selectedApplicationId) ?? null
@@ -79,7 +108,7 @@ export function LogsDataTable<TData extends RowData>({
 
   return <div className="flex flex-col h-full">
       <div className="flex items-center mb-2 pt-2 gap-2">
-        {apps.length > 0 && <>
+        {(type == "app" && apps.length > 0) || type == "db" ? <>
         <AppWindowMac className="size-4 text-muted-foreground"/>
         <Combobox
           items={apps}
@@ -99,10 +128,32 @@ export function LogsDataTable<TData extends RowData>({
             </ComboboxList>
           </ComboboxContent>
         </Combobox>
-        </>}
+        </> : 
+        type == "audit" && <>
+        <User className="size-4 text-muted-foreground"/>
+        <Combobox
+          items={users}
+          value={selectedApplication}
+          itemToStringValue={(user) => user.label}
+          onValueChange={(user) => usersColumn?.setFilterValue(user?.value ?? undefined)}
+        >
+          <ComboboxInput showClear className="w-full max-w-xs" placeholder="Filter users"/>
+          <ComboboxContent>
+            <ComboboxEmpty>No results.</ComboboxEmpty>
+            <ComboboxList>
+              {(item) => (
+                <ComboboxItem key={item.value} value={item}>
+                  {item.label}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        </>
+        }
         <ListFilter className="ml-2 size-4 text-muted-foreground"/>
         <Combobox
-          items={type === "app" ? appLogCodes : ["?"]}
+          items={type === "app" ? appLogCodes : type == "db" ? dbLogCodes : type == "audit" ? auditLogCodes :  ["?"]}
           value={selectedCode ?? null}
           onValueChange={(value) => codeColumn?.setFilterValue(value ?? undefined)}
         >

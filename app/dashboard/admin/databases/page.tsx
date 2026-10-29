@@ -9,6 +9,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import DashboardViewLayoutSwitch from "@/components/navigation/DashboardViewLayoutSwitch";
 
+export const metadata = {
+    title: "Databases",
+}
+
 export default function ApplicationsPage({searchParams}: {searchParams: Promise<{layout?: string | undefined}>}){
     return <Dashboard>
         <DashboardHeader breadcrumbs={[{name: "Databases"}]}/>

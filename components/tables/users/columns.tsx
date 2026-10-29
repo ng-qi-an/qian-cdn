@@ -125,9 +125,9 @@ export function getUserColumns({banUserAuth, deleteUserAuth, user}: UserColumnsP
             const [openDelete, setOpenDelete] = useState(false)
             const [openChangePassword, setOpenChangePassword] = useState(false)
             return <div className="flex justify-end w-full">
-                <BanUserDialog open={openBan} onOpenChange={setOpenBan} userId={row.original.id}/>
+                <BanUserDialog open={openBan} onOpenChange={setOpenBan} userId={row.original.id} userName={row.original.name} />
                 <DeleteUserDialog open={openDelete} onOpenChange={setOpenDelete} userId={row.original.id}/>
-                <ChangePasswordDialog open={openChangePassword} onOpenChange={setOpenChangePassword} userId={row.original.id}/>
+                <ChangePasswordDialog open={openChangePassword} onOpenChange={setOpenChangePassword} userId={row.original.id} userName={row.original.name} />
                 <DropdownMenu>
                     <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm">
                         <MoreHorizontal />

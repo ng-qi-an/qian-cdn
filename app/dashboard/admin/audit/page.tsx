@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function LogsPage() {
     return <Dashboard>
-        <DashboardHeader breadcrumbs={[{name: "Logs", href: "/dashboard/logs"}]} />
+        <DashboardHeader breadcrumbs={[{name: "Audit", href: "/dashboard/admin/audit"}]} />
         <DashboardBody>
-            <DashboardSectionHeader title="Logs" description="View logs of actions performed on your applications." />
+            <DashboardSectionHeader title="Audit" description="View actions performed across the platform." />
             <Suspense>
                 <RenderedLogsPage/>
             </Suspense>

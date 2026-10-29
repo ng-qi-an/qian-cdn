@@ -1,5 +1,5 @@
 import { auth } from "../auth";
-import { appAnalytics, applications, appLogs, databases, dbLogs, files } from "./schema";
+import { appAnalytics, applications, appLogs, auditLogs, databases, dbLogs, files } from "./schema";
 
 export type User = typeof auth.$Infer.Session.user;
 
@@ -8,4 +8,5 @@ export type Application = typeof applications.$inferSelect;
 export type Files = typeof files.$inferSelect;
 export type AppLog = typeof appLogs.$inferSelect;
 export type DbLog = typeof dbLogs.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;
 export type AppAnalytics = typeof appAnalytics.$inferSelect;

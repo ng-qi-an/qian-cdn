@@ -12,6 +12,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { makeAuditLogClient } from "@/lib/actions/logs/makeAuditLogClient";
 import { authClient } from "@/lib/auth-client";
 import { generateId } from "better-auth";
 import { Copy, RefreshCcw } from "lucide-react";
@@ -26,6 +27,8 @@ export default function ClientUsersPage({fetchedUsers}: {fetchedUsers: {email: s
     const [role, setRole] = useState<string>("user");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+    const { data } =  authClient.useSession();
+
     const roles = [
         {
             label: "View only",
@@ -79,7 +82,9 @@ export default function ClientUsersPage({fetchedUsers}: {fetchedUsers: {email: s
                         type: "error"
                     });
                 }
+                setIsSubmitting(false);
                 router.push("/dashboard/admin/users/"+newUser.user.id);
+                await makeAuditLogClient({userId: data!.user.id, code: "USER_CREATED", data: {user: {id: newUser.user.id, name: newUser.user.name}}});
                 return toast.add({
                     title: "User created",
                     description: "The user has been created successfully.",

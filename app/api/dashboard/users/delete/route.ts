@@ -1,4 +1,5 @@
 import { deleteFiles } from "@/lib/actions/files/deleteFiles";
+import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { InsufficientPermissionsError, InvalidConfigurationError, NotFoundError } from "@/lib/errors";
@@ -151,5 +152,6 @@ export const DELETE = verifyUser(async(req: Request, ctx, user) => {
     if (!deleteRes.success) {
         return Response.json({error: "FAILED_DELETE_USER", message: "Could not delete the user. No error is provided.", details: combinedResponse}, {status: 500});
     }
+    await makeAuditLog({userId: user.id, code: "USER_DELETED", data: {user: {id: targetUser.id, name: targetUser.name}}});
     return Response.json({status: "success", message: "User and associated databases/applications deleted successfully.", details: combinedResponse}, {status: 200});
 })

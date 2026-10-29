@@ -10,6 +10,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "
 import { Item, ItemActions, ItemContent, ItemDescription, ItemHeader, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
+import { makeAuditLogClient } from "@/lib/actions/logs/makeAuditLogClient";
 import { authClient, roles } from "@/lib/auth-client";
 import { checkUserHasHigherPerms } from "@/lib/permissions/permissionHelpers";
 import revalidateData from "@/lib/revalidateData";
@@ -63,6 +64,7 @@ export default function UserPageClient({user, sessions}: {user: User, sessions: 
                     type: "error"
                 })
             } else {
+                await makeAuditLogClient({userId: data!.user.id, code: "USER_EDITED", data: {user: {id: user.id, name: name}}});  
                 toast.add({
                     title: "Success",
                     description: "User updated successfully.",

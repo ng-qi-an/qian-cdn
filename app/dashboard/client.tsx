@@ -1,5 +1,4 @@
 'use client';
-import DashboardChart from "@/components/charts/DashboardChart";
 import DbAnalyticsChart from "@/components/charts/DbAnalyticsChart";
 import Dashboard from "@/components/navigation/Dashboard";
 import DashboardBody from "@/components/navigation/DashboardBody";
@@ -182,12 +181,6 @@ export default function ClientRenderedDashboardPage({adminView, isAdmin, user, f
                     </Card>
                 </Tabs>
             </div>
-            <Card size="sm" className="w-full mt-6">
-                <CardHeader>
-                    <CardTitle className="normal-case tracking-normal">Recent activity</CardTitle>
-                    <CardDescription>Measured from last 30 days</CardDescription>
-                </CardHeader>
-            </Card>
         </DashboardBody>
     </Dashboard>
 }

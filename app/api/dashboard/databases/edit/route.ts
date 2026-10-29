@@ -1,4 +1,5 @@
 import { makeDbLog } from "@/lib/actions/logs/dbLog";
+import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError, NotFoundError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyUser } from "@/lib/permissions/serverPermissionHelpers";
@@ -94,5 +95,6 @@ export const PATCH = verifyUser(async(req: Request, ctx, user) => {
         return errorToResponse(error);
     }
     await makeDbLog({dbId: data.dbId, code: "DATABASE_EDITED", data: payload, userId: user.id});
+    await makeAuditLog({userId: user.id, code: "DATABASE_EDITED", data: {database: {id: dbData.id, name: dbData.name}}});
     return Response.json({ message: "Database updated successfully", id: data.appId }, { status: 200 });
 })

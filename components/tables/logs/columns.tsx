@@ -3,7 +3,7 @@
 import { ColumnHelper, createColumnHelper } from "@tanstack/react-table"
 
 import { type DataTableFeatures } from "../features"
-import { Application, AppLog, DbLog } from "@/lib/schema/schemaTypes"
+import { Application, AppLog, AuditLog, DbLog } from "@/lib/schema/schemaTypes"
 import SortedColumnHeader from "../SortedColumnHeader"
 import { User } from "better-auth"
 import { ApiKey } from "@better-auth/api-key"
@@ -12,11 +12,12 @@ import Link from "next/link"
 import { AppWindowMac, Key, UserRound } from "lucide-react"
 import { availableServices } from "@/lib/services"
 import DbLogAction from "./DbLogAction"
+import AuditLogAction from "./AuditLogAction"
 
 
 // Use `accessor` for data columns and `display` for columns without one.
 
-export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type: "app" | "db", showUserLink: boolean, showAppOriginColumn?: boolean})=>{
+export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type: "app" | "db" | "audit", showUserLink: boolean, showAppOriginColumn?: boolean})=>{
     let columnHelper;
     let extraColumns: any[] = []
     if (type === "app") {
@@ -74,8 +75,7 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                     }
                 }
             }),
-            columnHelper.display({
-                id: "application",
+            columnHelper.accessor("fromAppId", {
                 header: ({table})=> <p className="flex items-center gap-1">Application</p>,
                 cell: ({row})=>{
                     const log = row.original
@@ -83,6 +83,29 @@ export const getLogsColumns = ({type, showUserLink, showAppOriginColumn}: {type:
                         return <Link href={`/dashboard/applications/${log.fromAppId}`} className={`hover:underline`} title="View API keys"><p className="flex items-center gap-2"><AppWindowMac className="size-4"/> {log.fromApp ? log.fromApp.name : "Unknown app"}</p></Link>
                     } else {
                         return <p className="text-muted-foreground">N/A</p>
+                    }
+                }
+            }),
+        ]
+    } else if (type == "audit") {
+        columnHelper = createColumnHelper<DataTableFeatures, AuditLog & {fromUser: User | null}>()
+        extraColumns = [
+            columnHelper.accessor("code", {
+                header: ({table})=> <p className="flex items-center gap-1">Action</p>,
+                cell: ({row}) => {
+                    const log = row.original
+                    return <AuditLogAction log={log}/>
+                }
+            }),
+            columnHelper.display({
+                id: "subject",
+                header: ({table})=> <p className="flex items-center gap-1">Action by</p>,
+                cell: ({row})=>{
+                    const log = row.original
+                    if (log.fromUser) {
+                        return <Link href={`/dashboard/admin/users/${log.fromUserId}`} className={`hover:underline ${!showUserLink && 'pointer-events-none'}`} title="View user details"><p className="flex items-center gap-2"><UserRound className="size-4"/> {log.fromUser.name}</p></Link>
+                    } else {
+                        return <p className="text-muted-foreground">Unknown user</p>
                     }
                 }
             }),
