@@ -12,6 +12,9 @@ export default async function sendEmail({destinationEmails, subject, template}: 
     if (!process.env.NOTIFICATION_EMAIL) {
         throw new Error("NOTIFICATION_EMAIL environment variable is not set.");
     }
+    if (destinationEmails.length === 0) {
+        return;
+    }
     const { error } = await resend.batch.send(destinationEmails.map((email)=> ({
         from: `Unified CDN <${process.env.NOTIFICATION_EMAIL}>`,
         to: [email],

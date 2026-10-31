@@ -5,7 +5,7 @@ export const defaultNotificationPriorities: { [Type in NotificationType]: Notifi
     "APIKEY_DELETED_USER": "high",
     "APPLICATION_REVIEWED_USER": "high",
     "APPLICATION_REVIEWED_ADMIN": "low",
-    "APPLICATION_CREATED": "low",
+    "APPLICATION_CREATED": "medium",
     "APPLICATION_REQUESTED": "medium",
     "APPLICATION_DELETED_USER": "high",
     "APPLICATION_DELETED": "low",
