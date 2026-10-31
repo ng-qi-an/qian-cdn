@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { appLogs } from "@/lib/schema/schema"
 import { generateId } from "better-auth"
+import { runAfterResponse } from "@/lib/runAfterResponse"
 import { AppLogCode, appLogCodes } from "./codes"
 
 
@@ -20,6 +21,13 @@ export async function makeAppLog({appId, code, data, userId, apiKeyId}: {appId: 
         data: data || {},
         createdAt: new Date()
     }
-    await db.insert(appLogs).values(payload);
+    // Runs after the response is sent so logging doesn't block the caller
+    runAfterResponse(async () => {
+        try {
+            await db.insert(appLogs).values(payload);
+        } catch (error) {
+            console.error("Error writing app log:", error);
+        }
+    });
     return payload
 }

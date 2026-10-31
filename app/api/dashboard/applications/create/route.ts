@@ -1,4 +1,5 @@
 import { makeAuditLog } from "@/lib/actions/logs/makeAuditLog";
+import sendNotification from "@/lib/actions/notifications/sendNotification";
 import { db } from "@/lib/db";
 import { InvalidConfigurationError } from "@/lib/errors";
 import { errorToResponse, userHasPermissionServer, verifyUserWithPermission } from "@/lib/permissions/serverPermissionHelpers";
@@ -39,5 +40,6 @@ export const POST = verifyUserWithPermission(async(user)=>{
         return Response.json({ error: "INTERNAL", message: "Unexpected error occurred while creating application."}, {status: 500});
     }
     await makeAuditLog({userId: user.id, code: "APPLICATION_CREATED", data: {application: {id: payload.id, name: payload.name}, database: {id: dbData.id, name: dbData.name}}});
+    await sendNotification("APPLICATION_CREATED", {userGroup: "admins", appName: payload.name, databaseName: dbData.name, triggerUser: {id: user.id, name: user.name}, link: `/dashboard/applications/${payload.id}`});
     return Response.json({ message: "Application created successfully", id: payload.id }, { status: 200 });
 })

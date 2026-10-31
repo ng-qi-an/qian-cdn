@@ -1,12 +1,13 @@
 import { db } from "@/lib/db"
 import { auditLogs } from "@/lib/schema/schema"
 import { generateId } from "better-auth"
-import { AuditLogCode, auditLogCodes, dbLogCodes } from "./codes"
+import { runAfterResponse } from "@/lib/runAfterResponse"
+import { AuditLogCode, auditLogCodes } from "./codes"
 
 
 export async function makeAuditLog({code, data, userId}: {code: AuditLogCode, data?: Record<string, any>, userId: string}) {
     if (!auditLogCodes.includes(code)) {
-        throw new Error(`Invalid db log code: ${code}. Must be one of: ${dbLogCodes.join(", ")}`)
+        throw new Error(`Invalid audit log code: ${code}. Must be one of: ${auditLogCodes.join(", ")}`)
     }
     const payload: typeof auditLogs.$inferInsert = {
         id: generateId(16),
@@ -14,6 +15,13 @@ export async function makeAuditLog({code, data, userId}: {code: AuditLogCode, da
         code: code,
         data: data || {},
     }
-    await db.insert(auditLogs).values(payload);
+    // Runs after the response is sent so logging doesn't block the caller
+    runAfterResponse(async () => {
+        try {
+            await db.insert(auditLogs).values(payload);
+        } catch (error) {
+            console.error("Error writing audit log:", error);
+        }
+    });
     return payload
 }

@@ -1,5 +1,5 @@
 import { defineRelationsPart } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, jsonb, index } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
 					id: text('id').primaryKey(),
@@ -12,7 +12,8 @@ export const user = pgTable("user", {
  role: text('role'),
  banned: boolean('banned').default(false),
  banReason: text('ban_reason'),
- banExpires: timestamp('ban_expires')
+ banExpires: timestamp('ban_expires'),
+ notif_preferences: jsonb('notif_preferences').default({"email":{"enabled":true,"priority":["high","medium"]}}).notNull()
 					});
 
 export const session = pgTable("session", {

@@ -1,7 +1,8 @@
-import { integer, timestamp, jsonb, numeric, pgTable, text, date, unique } from "drizzle-orm/pg-core";
+import { integer, timestamp, jsonb, numeric, pgTable, text, date, unique, boolean } from "drizzle-orm/pg-core";
 import { apikey, user } from "./auth-schema";
 import type { AppLogCode, AuditLogCode, DbLogCode } from "../actions/logs/codes";
 import { AnalyticsEventType } from "../actions/analytics/eventTypes";
+import { NotificationType } from "../actions/notifications/notificationTypes";
 
 export const databases = pgTable("databases", {
     id: text("id").primaryKey(),
@@ -93,3 +94,15 @@ export const appAnalytics = pgTable("app_analytics", {
       table.startDate,
     ),
 ])
+
+export const notifications = pgTable("notifications", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").$type<NotificationType>().notNull(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    link: text("link"),
+    read: boolean("read").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})

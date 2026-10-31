@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { dbLogs } from "@/lib/schema/schema"
 import { generateId } from "better-auth"
+import { runAfterResponse } from "@/lib/runAfterResponse"
 import { DbLogCode, dbLogCodes } from "./codes"
 
 
@@ -19,6 +20,13 @@ export async function makeDbLog({dbId, code, data, userId, appId}: {dbId: string
         code: code,
         data: data || {},
     }
-    await db.insert(dbLogs).values(payload);
+    // Runs after the response is sent so logging doesn't block the caller
+    runAfterResponse(async () => {
+        try {
+            await db.insert(dbLogs).values(payload);
+        } catch (error) {
+            console.error("Error writing db log:", error);
+        }
+    });
     return payload
 }

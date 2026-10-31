@@ -27,7 +27,7 @@ export default function GeneralSettingsCard({otherDbs, dbId, name, setName, visi
                             <SelectItem value="private">Private</SelectItem>
                         </SelectContent>
                     </Select>
-                    <FieldDescription>{visibility == "public" ? "All users can view and use this database. Only you can edit it." : "Only you and admins can use and edit this database."} </FieldDescription>
+                    <FieldDescription>{visibility == "public" ? "All users can view and use this database. Only you can edit it." : "Only you and super admins can use and edit this database. Existing applications remain connected."} </FieldDescription>
                 </Field>
             </FieldGroup>
         </CardContent>

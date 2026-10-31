@@ -15,6 +15,8 @@ import { makeDbLog } from "@/lib/actions/logs/dbLog";
 import updateSizeAnalyticsEvent from "@/lib/actions/analytics/updateSizeAnalyticsEvent";
 import updateFilesAnalyticsEvent from "@/lib/actions/analytics/updateFilesAnalyticsEvent";
 import updateRequestsAnalyticsEvent from "@/lib/actions/analytics/updateRequestsAnalyticsEvent";
+import { eq, sum } from "drizzle-orm";
+import passLimit from "@/lib/actions/files/passLimit";
 
 const maxFileSize = convertUnit(0.5, "gb", "b"); // 0.5 GB in bytes
 const maxFiles = 20; // Maximum number of files allowed
@@ -34,20 +36,35 @@ export const POST = verifyAPIKeyOrUser(async (req, ctx, apiKey, user) => {
             return errorToResponse(new InvalidConfigurationError("You can only upload a maximum of 20 files at a time."));
         }
         if (files.some(file => file.size > maxFileSize)) {
-            return errorToResponse(new InvalidConfigurationError("One or more files exceed the maximum allowed size of 1 GB."));
+            return errorToResponse(new InvalidConfigurationError("One or more files exceed the maximum allowed size of 0.5 GB."));
         }
-        let appData: Pick<Application, "id"> & { database: { provider: string, id: string, keys: any | undefined } | null } | null = null;
+        let appData: Pick<Application, "id" | "limit"> & { database: { provider: string, id: string, keys: any | undefined, limit: number } | null } | null = null;
         if (apiKey){
-            appData = await db.query.applications.findFirst({where: {id: apiKey.metadata?.appId}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true}}) ?? null;
+            appData = await db.query.applications.findFirst({where: {id: apiKey.metadata?.appId}, with: {database: {columns: {provider: true, id: true, keys: true, limit: true}}}, columns: {id: true, limit: true}}) ?? null;
         } else if (user){
             if (!formData.get("appId")){
                 return errorToResponse(new InvalidConfigurationError("Missing appId in form data."));
             }
             const viewAllPerms = await userHasPermissionServer({applications: ['viewAll']}, user);
-            appData = await db.query.applications.findFirst({where: {id: formData.get("appId") as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, with: {database: {columns: {provider: true, id: true, keys: true}}}, columns: {id: true}}) ?? null;
+            appData = await db.query.applications.findFirst({where: {id: formData.get("appId") as string, ownerId: !viewAllPerms.isAuthorised ? user.id : {isNotNull: true}}, with: {database: {columns: {provider: true, id: true, keys: true, limit: true}}}, columns: {id: true, limit: true}}) ?? null;
         }
         if (!appData) {
             return errorToResponse(new UnauthorisedError());
+        }
+        const incomingSize = files.reduce((acc, file) => acc + file.size, 0);
+        if (appData.limit > 0){
+            const totalAppSize = (await db.select({ totalSize: sum(filesDb.size) }).from(filesDb).where(eq(filesDb.applicationId, appData.id)))[0]?.totalSize;
+            const passedApp = passLimit({incomingSize, currentSize: totalAppSize ? Number(totalAppSize) : 0, limit: appData.limit})
+            if (!passedApp.success){
+                return Response.json({error: "LIMIT_EXCEEDED", message: `Uploading your payload would exceed the application's file limit by ${passedApp.exceedsBy} bytes.`, exceedsBy: passedApp.exceedsBy}, {status: 403});
+            }
+        }
+        if (appData.database && appData.database.limit > 0){
+            const totalDbSize = (await db.select({ totalSize: sum(filesDb.size) }).from(filesDb).where(eq(filesDb.databaseId, appData.database.id)))[0]?.totalSize;
+            const passedDb = passLimit({incomingSize, currentSize: totalDbSize ? Number(totalDbSize) : 0, limit: appData.database.limit})
+            if (!passedDb.success){
+                return Response.json({error: "LIMIT_EXCEEDED", message: `Uploading your payload would exceed the database's file limit by ${passedDb.exceedsBy} bytes.`, exceedsBy: passedDb.exceedsBy}, {status: 403});
+            }
         }
         if (appData.database?.provider == "hackclub-cdn"){
             const client = new HCDNClient(appData.database.keys.apiKey);

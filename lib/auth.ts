@@ -19,7 +19,17 @@ export const auth = betterAuth({
     }, 
     user: {
         additionalFields: {
-
+            notif_preferences: {
+                type: "json",
+                required: true,
+                input: true,
+                defaultValue: {
+                    email: {
+                        enabled: true,
+                        priority: ["high", "medium"]
+                    }
+                }
+            }
         }
     },
     session: {
