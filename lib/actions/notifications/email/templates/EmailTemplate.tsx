@@ -24,9 +24,9 @@ export default function EmailTemplate({children}: {children: React.ReactNode}){
                         {children}
                     </Section>
                     <Hr className="border-t border-gray-300"/>
-                    <Section className="pt-6 pb-10 px-4">
+                    <Section className="pt-6 pb-10 px-4 text-justify">
                         <Text className="opacity-70 m-0 mb-4">This email is meant to be recieved by users of Unified CDN. If you were not expecting this email, you can safely ignore it.</Text>
-                        <Text className="m-0 opacity-70 text-balance">
+                        <Text className="m-0 opacity-70 text-justify">
                             Unified CDN is a platform that allows you to combine file storage and delivery into a single, easy-to-use service.
                             <Link href="https://unified-cdn.ngqian.com" className="ml-1 text-balance underline text-black">Learn more</Link>
                         </Text>

@@ -78,6 +78,11 @@ const sampleData: Record<NotificationType, SampleData> = {
     USER_CREATED_USER: {
         link: "/dashboard",
         triggerUser: { id: "user-123", name: "Alex Morgan" },
+        newUser: {
+            email: "jamie.lee@example.com",
+            name: "Jamie Lee",
+            password: "ExamplePassword123!",
+        },
     },
     USER_CREATED_ADMIN: {
         link: "/dashboard/admin/users/example",
@@ -239,7 +244,7 @@ export default function EmailViewerPage() {
                                 Choose a notification and edit the JSON passed to its template.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="overflow-auto">
                             <FieldGroup>
                                 <Field>
                                     <FieldLabel htmlFor="notification-type">Notification type</FieldLabel>

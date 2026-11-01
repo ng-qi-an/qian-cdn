@@ -1,7 +1,6 @@
-import { Button, Section } from "react-email";
 import { NotificationTypes } from "../../notificationTypes";
 import EmailTemplate from "./EmailTemplate";
-import { AppWindowMac, Trash2 } from "lucide-static";
+import { Trash2 } from "lucide-static";
 import EmailSectionHero from "./EmailSectionHero";
 
 export default function ApplicationDeletedUser(props: Parameters<typeof NotificationTypes.APPLICATION_DELETED_USER>[0]) {
