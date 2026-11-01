@@ -1,5 +1,14 @@
 import { ReactNode } from "react"
 import ApplicationCreated from "./email/templates/ApplicationCreated"
+import ApplicationRequested from "./email/templates/ApplicationRequested"
+import ApplicationReviewedUser from "./email/templates/ApplicationReviewedUser"
+import ApplicationReviewedAdmin from "./email/templates/ApplicationReviewedAdmin"
+import APIKeyDeletedUser from "./email/templates/APIKeyDeletedUser"
+import ApplicationDeletedUser from "./email/templates/ApplicationDeletedUser"
+import ApplicationDeletedAdmin from "./email/templates/ApplicationDeletedAdmin"
+import DatabaseCreated from "./email/templates/DatabaseCreated"
+import DatabaseDeletedAdmin from "./email/templates/DatabaseDeletedAdmin"
+import DatabaseDeletedUser from "./email/templates/DatabaseDeletedUser"
 
 export type NotificationConfigurationType = {
     title: string,
@@ -26,48 +35,56 @@ export const NotificationTypes = {
     "APPLICATION_REQUESTED": (props: {appName: string, databaseName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Application requested`,
         description: `${props.triggerUser.name} requested a new application with the name ${props.appName} on database ${props.databaseName}.`,
-        link: props.link
+        link: props.link,
+        emailTemplate: <ApplicationRequested {...props}/>
     }),
     "APPLICATION_REVIEWED_USER": (props: {appName: string, approved: boolean} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Application ${props.approved ? "approved" : "denied"}`,
         link: props.link,
         description: `${props.triggerUser.name} ${props.approved ? "approved" : "denied"} your application ${props.appName}.`,
+        emailTemplate: <ApplicationReviewedUser {...props}/>
     }),
     "APPLICATION_REVIEWED_ADMIN": (props: {appName: string, databaseName: string, appOwnerName: string, approved: boolean} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Application ${props.approved ? "approved" : "denied"}`,
         link: props.link,
         description: `${props.triggerUser.name} ${props.approved ? "approved" : "denied"} an application "${props.appName}" by ${props.appOwnerName} on database ${props.databaseName}.`,
+        emailTemplate: <ApplicationReviewedAdmin {...props}/>
     }),
     "APIKEY_DELETED_USER": (props: {apiKeyName: string, appName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `API key deleted`,
         description: `${props.triggerUser.name} deleted an API key with the name ${props.apiKeyName} on your app ${props.appName}.`,
         link: props.link,
-        emailTemplate: <></>
+        emailTemplate: <APIKeyDeletedUser {...props}/>
     }),
     "APPLICATION_DELETED_USER": (props: {appName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Application deleted`,
         description: `${props.triggerUser.name} deleted your application ${props.appName}.`,
         link: props.link,
+        emailTemplate: <ApplicationDeletedUser {...props}/>
     }),
-    "APPLICATION_DELETED": (props: {appName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
+    "APPLICATION_DELETED_ADMIN": (props: {appName: string, ownerName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Application deleted`,
-        description: `${props.triggerUser.name} deleted the application ${props.appName}.`,
+        description: `${props.triggerUser.name} deleted the application ${props.appName} by ${props.ownerName}.`,
         link: props.link,
+        emailTemplate: <ApplicationDeletedAdmin {...props}/>
     }),
     "DATABASE_CREATED": (props: {databaseName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Database created`,
         description: `${props.triggerUser.name} created a new database with the name ${props.databaseName}.`,
         link: props.link,
+        emailTemplate: <DatabaseCreated {...props}/>
     }),
-    "DATABASE_DELETED": (props: {databaseName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
+    "DATABASE_DELETED_ADMIN": (props: {databaseName: string, ownerName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Database deleted`,
-        description: `${props.triggerUser.name} deleted the database with the name ${props.databaseName}.`,
+        description: `${props.triggerUser.name} deleted the database with the name ${props.databaseName} by ${props.ownerName}.`,
         link: props.link,
+        emailTemplate: <DatabaseDeletedAdmin {...props}/>
     }),
     "DATABASE_DELETED_USER": (props: {databaseName: string} & DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `Database deleted`,
         description: `${props.triggerUser.name} deleted your database with the name ${props.databaseName}.`,
         link: props.link,
+        emailTemplate: <DatabaseDeletedUser {...props}/>
     }),
     "USER_CREATED_USER": (props: DefaultNotificationParameters): NotificationConfigurationType => ({
         title: `User created`,

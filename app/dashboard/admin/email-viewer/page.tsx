@@ -3,6 +3,7 @@
 import { render } from "@react-email/render";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Dashboard from "@/components/navigation/Dashboard";
 import DashboardBody from "@/components/navigation/DashboardBody";
 import DashboardHeader from "@/components/navigation/DashboardHeader";
@@ -16,7 +17,7 @@ import { NotificationTypes, NotificationType, NotificationTypeList } from "@/lib
 
 type SampleData = Record<string, unknown>;
 
-const sampleDataWithoutTargetUser: Record<NotificationType, SampleData> = {
+const sampleData: Record<NotificationType, SampleData> = {
     APPLICATION_CREATED: {
         link: "/dashboard/applications/example",
         appName: "Example CDN app",
@@ -54,7 +55,7 @@ const sampleDataWithoutTargetUser: Record<NotificationType, SampleData> = {
         appName: "Example CDN app",
         triggerUser: { id: "user-123", name: "Alex Morgan" },
     },
-    APPLICATION_DELETED: {
+    APPLICATION_DELETED_ADMIN: {
         link: "/dashboard/applications",
         appName: "Example CDN app",
         triggerUser: { id: "user-123", name: "Alex Morgan" },
@@ -64,7 +65,7 @@ const sampleDataWithoutTargetUser: Record<NotificationType, SampleData> = {
         databaseName: "Production database",
         triggerUser: { id: "user-123", name: "Alex Morgan" },
     },
-    DATABASE_DELETED: {
+    DATABASE_DELETED_ADMIN: {
         link: "/dashboard/admin/databases",
         databaseName: "Production database",
         triggerUser: { id: "user-123", name: "Alex Morgan" },
@@ -125,14 +126,6 @@ const sampleDataWithoutTargetUser: Record<NotificationType, SampleData> = {
     },
 };
 
-const targetUser = { id: "user-456", name: "Jamie Lee" };
-const sampleData = Object.fromEntries(
-    Object.entries(sampleDataWithoutTargetUser).map(([type, data]) => [
-        type,
-        { ...data, targetUser },
-    ])
-) as unknown as Record<NotificationType, SampleData>;
-
 const formatNotificationName = (type: NotificationType) =>
     type
         .toLowerCase()
@@ -153,9 +146,15 @@ function parseSampleData(value: string): SampleData {
 }
 
 export default function EmailViewerPage() {
-    const [selectedType, setSelectedType] = useState<NotificationType>("APPLICATION_CREATED");
-    const [sampleText, setSampleText] = useState(() => JSON.stringify(sampleData.APPLICATION_CREATED, null, 2));
-    const [appliedData, setAppliedData] = useState<SampleData>(sampleData.APPLICATION_CREATED);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const typeParam = searchParams.get("type");
+    const initialType = NotificationTypeList.includes(typeParam as NotificationType)
+        ? typeParam as NotificationType
+        : "APPLICATION_CREATED";
+    const [selectedType, setSelectedType] = useState<NotificationType>(initialType);
+    const [sampleText, setSampleText] = useState(() => JSON.stringify(sampleData[initialType], null, 2));
+    const [appliedData, setAppliedData] = useState<SampleData>(sampleData[initialType]);
     const [parseError, setParseError] = useState<string | null>(null);
     const [renderedPreview, setRenderedPreview] = useState<{
         template: ReactNode;
@@ -206,6 +205,9 @@ export default function EmailViewerPage() {
         if (!value || !NotificationTypeList.includes(value as NotificationType)) return;
         const type = value as NotificationType;
         const nextData = sampleData[type];
+        const nextSearchParams = new URLSearchParams(searchParams.toString());
+        nextSearchParams.set("type", type);
+        router.push(`?${nextSearchParams.toString()}`);
         setSelectedType(type);
         setSampleText(JSON.stringify(nextData, null, 2));
         setAppliedData(nextData);
